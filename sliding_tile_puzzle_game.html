@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Sliding Puzzle</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    #puzzle { width: 90vmin; height: 90vmin; max-width: 500px; max-height: 500px; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 2px; }
+    .tile { background-size: 500% 500%; background-repeat: no-repeat; cursor: pointer; }
+    .empty { background: #eee; cursor: default; }
+    #timer { margin-top: 20px; font-size: 1.5rem; }
+    #share { margin-top: 20px; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Daily Sliding Puzzle</h1>
+  <div id="puzzle"></div>
+  <div id="timer">Time: 0s</div>
+  <button id="share">Share Score</button>
+
+  <script>
+    const gridSize = 5;
+    const puzzleEl = document.getElementById('puzzle');
+    const timerEl = document.getElementById('timer');
+    const shareBtn = document.getElementById('share');
+
+    let tiles = [];
+    let emptyIndex = 24;
+    let startTime;
+    let timerInterval;
+
+    function getDailyImageUrl() {
+      const images = [
+        'https://picsum.photos/500?random=1',
+        'https://picsum.photos/500?random=2',
+        'https://picsum.photos/500?random=3',
+        'https://picsum.photos/500?random=4'
+      ];
+      const dayIndex = Math.floor(Date.now() / (24*60*60*1000));
+      return images[dayIndex % images.length];
+    }
+
+    async function initPuzzle() {
+      const imgUrl = getDailyImageUrl();
+      tiles = [...Array(25).keys()];
+      emptyIndex = 24;
+
+      // deterministic shuffle
+      const seed = new Date().toISOString().split('T')[0];
+      function seededRandom(s) { let x = s.split('').reduce((a,c)=>a+c.charCodeAt(0),0); return ()=> (x = (x*16807)%2147483647)/2147483647; }
+      const rand = seededRandom(seed);
+      for (let i = 0; i < 200; i++) {
+        const possible = getMovableTiles(emptyIndex);
+        const move = possible[Math.floor(rand()*possible.length)];
+        [tiles[emptyIndex], tiles[move]] = [tiles[move], tiles[emptyIndex]];
+        emptyIndex = move;
+      }
+
+      renderTiles(imgUrl);
+      startTimer();
+    }
+
+    function renderTiles(imgUrl) {
+      puzzleEl.innerHTML = '';
+      tiles.forEach((tile, index) => {
+        const div = document.createElement('div');
+        if (index === emptyIndex) {
+          div.className = 'tile empty';
+        } else {
+          div.className = 'tile';
+          const x = tile % gridSize;
+          const y = Math.floor(tile / gridSize);
+          div.style.backgroundImage = `url(${imgUrl})`;
+          div.style.backgroundPosition = `${(x / 4) * 100}% ${(y / 4) * 100}%`;
+        }
+        div.addEventListener('click', () => handleTileClick(index));
+        puzzleEl.appendChild(div);
+      });
+    }
+
+    function getMovableTiles(empty) {
+      const moves = [];
+      const row = Math.floor(empty / gridSize);
+      const col = empty % gridSize;
+      if (row > 0) moves.push(empty - gridSize);
+      if (row < gridSize - 1) moves.push(empty + gridSize);
+      if (col > 0) moves.push(empty - 1);
+      if (col < gridSize - 1) moves.push(empty + 1);
+      return moves;
+    }
+
+    function handleTileClick(index) {
+      const movable = getMovableTiles(emptyIndex);
+      if (!movable.includes(index)) return;
+      [tiles[emptyIndex], tiles[index]] = [tiles[index], tiles[emptyIndex]];
+      emptyIndex = index;
+      renderTiles(getDailyImageUrl());
+      if (isSolved()) stopTimer();
+    }
+
+    function isSolved() {
+      return tiles.every((v,i)=>v===i);
+    }
+
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const secs = Math.floor((Date.now() - startTime)/1000);
+        timerEl.textContent = `Time: ${secs}s`;
+      }, 200);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      const secs = Math.floor((Date.now() - startTime)/1000);
+      shareBtn.onclick = () => {
+        const url = window.location.origin + window.location.pathname + `?score=${secs}`;
+        navigator.clipboard.writeText(url);
+        alert('Score link copied to clipboard!');
+      };
+    }
+
+    initPuzzle();
+  </script>
+</body>
+</html>
