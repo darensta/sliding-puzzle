@@ -6,8 +6,8 @@
   <title>Daily Sliding Puzzle</title>
   <style>
     body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    #puzzle { width: 90vmin; height: 90vmin; max-width: 500px; max-height: 500px; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 2px; }
-    .tile { background-size: 500% 500%; background-repeat: no-repeat; cursor: pointer; }
+    #puzzle { width: 90vmin; height: 90vmin; max-width: 500px; max-height: 500px; display: grid; grid-template-columns: repeat(var(--gridSize), 1fr); grid-template-rows: repeat(var(--gridSize), 1fr); gap: 2px; }
+    .tile { background-size: 100% 100%; background-repeat: no-repeat; cursor: pointer; }
     .empty { background: #eee; cursor: default; }
     #timer { margin-top: 20px; font-size: 1.5rem; }
     #share { margin-top: 20px; font-size: 1rem; }
@@ -21,12 +21,14 @@
 
   <script>
     const gridSize = 4;
+    document.getElementById('puzzle').style.setProperty('--gridSize', gridSize);
+
     const puzzleEl = document.getElementById('puzzle');
     const timerEl = document.getElementById('timer');
     const shareBtn = document.getElementById('share');
 
     let tiles = [];
-    let emptyIndex = 24;
+    let emptyIndex;
     let startTime;
     let timerInterval;
 
@@ -43,8 +45,8 @@
 
     async function initPuzzle() {
       const imgUrl = getDailyImageUrl();
-      tiles = [...Array(25).keys()];
-      emptyIndex = 24;
+      tiles = [...Array(gridSize * gridSize).keys()];
+      emptyIndex = tiles.length - 1;
 
       // deterministic shuffle
       const seed = new Date().toISOString().split('T')[0];
@@ -72,7 +74,7 @@
           const x = tile % gridSize;
           const y = Math.floor(tile / gridSize);
           div.style.backgroundImage = `url(${imgUrl})`;
-          div.style.backgroundPosition = `${(x / 4) * 100}% ${(y / 4) * 100}%`;
+          div.style.backgroundPosition = `${(x / (gridSize - 1)) * 100}% ${(y / (gridSize - 1)) * 100}%`;
         }
         div.addEventListener('click', () => handleTileClick(index));
         puzzleEl.appendChild(div);
