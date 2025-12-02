@@ -1,509 +1,350 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Daily Sliding Puzzle</title>
+
 <style>
-  :root { --gap: 6px; --max-size: 640px; --bg:#0f172a; --card:#ffffff; }
-  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:#f3f4f6;color:#111}
-  .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
-  h1{margin:0 0 12px;font-size:20px}
-  #puzzle {
-    display:grid;
-    gap:var(--gap);
-    width:88vmin;
-    height:88vmin;
-    max-width:var(--max-size);
-    max-height:var(--max-size);
-    background:#111827;
-    box-shadow:0 8px 30px rgba(2,6,23,0.12);
-    touch-action: manipulation;
-    border-radius:10px;
-    padding:var(--gap);
-    box-sizing:border-box;
-  }
-  .tile {
-    aspect-ratio: 1 / 1;           /* force perfect squares */
-    width:100%;
-    height:100%;
-    background-repeat:no-repeat;
-    background-size:cover;
-    cursor:pointer;
-    user-select:none;
-    -webkit-user-select:none;
-    display:block;
-    transition: transform .12s ease;
-    box-sizing:border-box;
-    border-radius:6px;
-    overflow:hidden;
-  }
-  .tile:active{ transform: scale(.995) }
-  .tile.empty {
-    background: #0b1220;
-    cursor: default;
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.02);
-  }
+body {
+  margin: 0;
+  padding: 0;
+  background: #111;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  /* controls */
-  #controls { margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; }
-  #timer { font-weight:600; background:#fff;padding:6px 10px;border-radius:8px; }
-  button { padding:8px 12px; border-radius:8px; border: none; background:#111827; color:#fff; cursor:pointer; font-size:14px; }
-  button:active{ transform: translateY(1px); }
-  .muted { color:#6b7280; font-size:13px; }
+#puzzle {
+  margin-top: 20px;
+  width: 90vw;
+  max-width: 400px;
+  height: 90vw;
+  max-height: 400px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  background: #222;
+  position: relative;
+}
 
-  /* modal */
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(2,6,23,0.6);
-    display: none;
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
-    padding: 20px;
-  }
-  .modal {
-    width: 100%;
-    max-width: 420px;
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 18px 50px rgba(2,6,23,0.3);
-    transform: translateY(16px) scale(.98);
-    opacity: 0;
-    transition: all 240ms ease;
-    text-align:center;
-  }
-  .modal.show { transform: translateY(0) scale(1); opacity:1; }
-  .modal h2 { margin: 0 0 8px; font-size:20px; }
-  .modal p { margin: 6px 0; color:#374151; }
-  .modal .big { font-size:28px; font-weight:700; margin-top:6px; }
-  .modal .small { font-size:14px; color:#6b7280; }
-  .modal .row { display:flex; gap:8px; justify-content:center; margin-top:12px; }
-  .modal .row button { padding:10px 14px; border-radius:8px; }
-  .sr-only { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+.tile {
+  background-size: 400% 400%;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tile.empty {
+  background: #000;
+  cursor: default;
+}
+
+#timer {
+  font-size: 22px;
+  margin-top: 15px;
+}
+
+#best-time {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+/* Solved Modal */
+#solved-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#solved-box {
+  background: #222;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+#share-btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: #4CAF50;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#share-btn:hover {
+  background: #45a049;
+}
 </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <h1>Daily Sliding Puzzle</h1>
-    <div id="puzzle" aria-label="sliding puzzle" role="application"></div>
 
-    <div id="controls">
-      <div id="timer" aria-live="polite">Time: <span id="time">0.0</span>s</div>
-      <button id="reset">Reset</button>
-      <button id="share">Share Score</button>
-      <div class="muted" id="imageName" aria-hidden="true"></div>
-    </div>
+<h2>Daily Sliding Puzzle</h2>
+
+<div id="timer">Time: 0.00</div>
+<div id="best-time"></div>
+
+<div id="puzzle"></div>
+
+<!-- Solved modal -->
+<div id="solved-modal">
+  <div id="solved-box">
+    <h2>Solved!</h2>
+    <p id="final-time"></p>
+    <button id="share-btn">Share</button>
   </div>
-
-  <!-- solved modal -->
-  <div id="backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="solvedTitle">
-    <div id="modal" class="modal" role="document">
-      <h2 id="solvedTitle">🎉 Solved!</h2>
-      <div class="big" id="solvedTime">0s</div>
-      <div class="small">Your time</div>
-
-      <p id="bestToday" class="small">Today's best: —</p>
-      <p id="bestGlobal" class="small">All-time best: —</p>
-
-      <div class="row">
-        <button id="playAgain">Play Again</button>
-        <button id="modalShare">Share</button>
-      </div>
-      <div style="margin-top:10px;">
-        <button id="closeModal" style="background:#ef4444">Close</button>
-      </div>
-    </div>
-  </div>
+</div>
 
 <script>
-/* -----------------------------
-   CONFIG
-------------------------------*/
-const gridSize = 4;   // default 4x4
+const gridSize = 4;
 const tileCount = gridSize * gridSize;
-const imagesPath = 'images'; // root images folder (images/YYYYMMDD.jpg)
 
-/* -----------------------------
-   DOM
-------------------------------*/
-const puzzleEl = document.getElementById('puzzle');
-const timeEl = document.getElementById('time');
-const resetBtn = document.getElementById('reset');
-const shareBtn = document.getElementById('share');
-const imageNameEl = document.getElementById('imageName');
+const puzzleEl = document.getElementById("puzzle");
+const timerEl = document.getElementById("timer");
+const bestTimeEl = document.getElementById("best-time");
+const modal = document.getElementById("solved-modal");
+const finalTimeEl = document.getElementById("final-time");
+const shareBtn = document.getElementById("share-btn");
 
-const backdrop = document.getElementById('backdrop');
-const modal = document.getElementById('modal');
-const solvedTimeEl = document.getElementById('solvedTime');
-const bestTodayEl = document.getElementById('bestToday');
-const bestGlobalEl = document.getElementById('bestGlobal');
-const playAgainBtn = document.getElementById('playAgain');
-const modalShareBtn = document.getElementById('modalShare');
-const closeModalBtn = document.getElementById('closeModal');
-
-/* -----------------------------
-   STATE
-------------------------------*/
-let tiles = [];            // tiles[pos] = originalTileIndex
+let tiles = [];
 let emptyIndex = tileCount - 1;
-let started = false;
-let startTime = 0;
-let rafTimer = null;
-let imgUrl = null;
-let usedDateString = null; // YYYYMMDD of chosen image (UTC)
-let dailySeedStr = null;
+let startTime = null;
+let timerInterval = null;
+let dailySeed = 0;
+let todayImagePath = "";
 
-/* -----------------------------
-   Grid setup
-------------------------------*/
-puzzleEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-puzzleEl.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
-
-/* -----------------------------
-   Date helpers (UTC)
-------------------------------*/
-function toUTCYYYYMMDD(date) {
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(date.getUTCDate()).padStart(2, '0');
-  return `${y}${m}${d}`;
-}
-function yesterdayUTCYYYYMMDD(date) {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  d.setUTCDate(d.getUTCDate() - 1);
-  return toUTCYYYYMMDD(d);
-}
-
-/* -----------------------------
-   Load today's image (UTC) with fallback to yesterday (UTC)
-------------------------------*/
-function loadImageForUTCDate(callback) {
+// ------------------------------------------------------
+// UTC DAY IMAGE SELECTION WITH YESTERDAY FALLBACK
+// ------------------------------------------------------
+function getUTCDateString(offsetDays = 0) {
   const now = new Date();
-  const todayStr = toUTCYYYYMMDD(now);
-  const yesterdayStr = yesterdayUTCYYYYMMDD(now);
-  const tryPaths = [
-    `${imagesPath}/${todayStr}.jpg`,
-    `${imagesPath}/${yesterdayStr}.jpg`
-  ];
-  let tried = 0;
-  function attempt() {
-    if (tried >= tryPaths.length) {
-      // final fallback to default if exists
-      const fallback = `${imagesPath}/default.jpg`;
-      imgUrl = fallback;
-      usedDateString = null;
-      imageNameEl.textContent = fallback;
-      dailySeedStr = toUTCYYYYMMDD(now); // still use today's date for seed even if fallback default used
-      callback();
-      return;
-    }
-    const path = tryPaths[tried++];
-    const i = new Image();
-    i.onload = () => {
-      imgUrl = path;
-      const m = path.match(/(\d{8})\.jpg$/);
-      usedDateString = m ? m[1] : null;
-      dailySeedStr = usedDateString || toUTCYYYYMMDD(now);
-      imageNameEl.textContent = path;
-      callback();
-    };
-    i.onerror = () => {
-      attempt();
-    };
-    // set src (browser will try to load)
-    i.src = path;
-  }
-  attempt();
+  const utcYear = now.getUTCFullYear();
+  const utcMonth = now.getUTCMonth() + 1;
+  const utcDay = now.getUTCDate() + offsetDays;
+
+  const d = new Date(Date.UTC(utcYear, utcMonth - 1, utcDay));
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}${m}${day}`;
 }
 
-/* -----------------------------
-   RNG (Park-Miller) seeded from dailySeedStr + gridSize
-------------------------------*/
-function seededRandom(seedStr) {
-  // convert string to 32-bit int seed
-  let seed = 0;
-  for (let i = 0; i < seedStr.length; i++) {
-    seed = (seed * 31 + seed.charCodeAt(i)) >>> 0;
+async function loadDailyImage() {
+  const today = getUTCDateString(0);
+  const yesterday = getUTCDateString(-1);
+
+  const tryPathToday = `/images/${today}.jpg`;
+  const tryPathYesterday = `/images/${yesterday}.jpg`;
+
+  // Check today
+  const todayExists = await fetch(tryPathToday, { method: "HEAD" })
+    .then(res => res.ok)
+    .catch(() => false);
+
+  if (todayExists) {
+    todayImagePath = tryPathToday;
+    dailySeed = Number(today);
+    return;
   }
-  if (seed === 0) seed = 1;
+
+  // Fallback: yesterday
+  const yExists = await fetch(tryPathYesterday, { method: "HEAD" })
+    .then(res => res.ok)
+    .catch(() => false);
+
+  if (yExists) {
+    todayImagePath = tryPathYesterday;
+    dailySeed = Number(yesterday);
+    return;
+  }
+
+  // If both missing, use placeholder
+  todayImagePath = "";
+  dailySeed = 20250101;
+}
+
+// ------------------------------------------------------
+// PRNG so shuffle is identical for all users each day
+// ------------------------------------------------------
+function seededRandom(seed) {
   return function() {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
+    seed = (seed * 48271) % 2147483647;
+    return seed / 2147483647;
   };
 }
 
-/* -----------------------------
-   Init solved tiles
-------------------------------*/
-function initTilesSolved() {
-  tiles = Array.from({length: tileCount}, (_, i) => i);
-  emptyIndex = tileCount - 1;
-}
+// ------------------------------------------------------
+// Build puzzle tiles
+// ------------------------------------------------------
+function buildPuzzle(imageURL) {
+  puzzleEl.innerHTML = "";
+  tiles = [];
 
-/* -----------------------------
-   Render tiles onto the DOM
-------------------------------*/
-function renderTiles() {
-  puzzleEl.innerHTML = '';
-  for (let pos = 0; pos < tileCount; pos++) {
-    const tileEl = document.createElement('div');
-    tileEl.className = 'tile';
-    tileEl.setAttribute('role','button');
-    tileEl.setAttribute('aria-label', `tile ${pos+1}`);
-    tileEl.dataset.pos = pos;
-
-    if (pos === emptyIndex) {
-      tileEl.classList.add('empty');
-    } else {
-      const originalIndex = tiles[pos];
-      const col = originalIndex % gridSize;
-      const row = Math.floor(originalIndex / gridSize);
-
-      tileEl.style.backgroundImage = `url("${imgUrl}")`;
-      // Because images are square, dividing works cleanly:
-      tileEl.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
-      tileEl.style.backgroundPosition = `${(col / (gridSize - 1)) * 100}% ${(row / (gridSize - 1)) * 100}%`;
-    }
-
-    tileEl.addEventListener('click', () => handleTileClick(parseInt(tileEl.dataset.pos,10)));
-    puzzleEl.appendChild(tileEl);
-  }
-}
-
-/* -----------------------------
-   Neighbors & move helpers
-------------------------------*/
-function posToRC(pos) { return { r: Math.floor(pos / gridSize), c: pos % gridSize }; }
-function neighbors(pos) {
-  const {r,c} = posToRC(pos);
-  const out = [];
-  if (r > 0) out.push(pos - gridSize);
-  if (r < gridSize - 1) out.push(pos + gridSize);
-  if (c > 0) out.push(pos - 1);
-  if (c < gridSize - 1) out.push(pos + 1);
-  return out;
-}
-function isNeighbor(a,b) { return neighbors(a).includes(b); }
-
-/* -----------------------------
-   Move on click
-------------------------------*/
-function handleTileClick(pos) {
-  if (!isNeighbor(pos, emptyIndex)) return;
-  if (!started) startTimer();
-  // swap in tiles array (swap original indexes)
-  [tiles[emptyIndex], tiles[pos]] = [tiles[pos], tiles[emptyIndex]];
-  emptyIndex = pos;
-  renderTiles();
-  if (isSolved()) onSolved();
-}
-
-/* -----------------------------
-   Check solved state
-------------------------------*/
-function isSolved() {
   for (let i = 0; i < tileCount; i++) {
-    if (tiles[i] !== i) return false;
-  }
-  return true;
-}
+    const tile = document.createElement("div");
+    tile.classList.add("tile");
 
-/* -----------------------------
-   Timer
-------------------------------*/
-function startTimer() {
-  started = true;
-  startTime = performance.now();
-  cancelAnimationFrame(rafTimer);
-  function tick() {
-    const secs = ((performance.now() - startTime) / 1000).toFixed(1);
-    timeEl.textContent = secs;
-    rafTimer = requestAnimationFrame(tick);
-  }
-  rafTimer = requestAnimationFrame(tick);
-}
-function stopTimerAndGetSecondsRounded() {
-  started = false;
-  cancelAnimationFrame(rafTimer);
-  const secsFloat = (performance.now() - startTime) / 1000;
-  const secsRounded = Math.round(secsFloat);
-  timeEl.textContent = String(secsRounded);
-  return secsRounded;
-}
-
-/* -----------------------------
-   Deterministic shuffle using legal moves (seeded)
-------------------------------*/
-function deterministicShuffle() {
-  const seedKey = (dailySeedStr || toUTCYYYYMMDD(new Date())) + '-' + gridSize;
-  const rand = seededRandom(seedKey);
-
-  // perform legal random moves from solved state
-  let moves = 200;
-  while (moves-- > 0) {
-    const nbs = neighbors(emptyIndex);
-    const choice = nbs[Math.floor(rand() * nbs.length)];
-    [tiles[emptyIndex], tiles[choice]] = [tiles[choice], tiles[emptyIndex]];
-    emptyIndex = choice;
-  }
-
-  // reset timer UI
-  started = false;
-  timeEl.textContent = '0.0';
-}
-
-/* -----------------------------
-   LocalStorage best times handling
-------------------------------*/
-function bestKeyForDate(dateStr) { return `best-${dateStr}`; }
-const globalKey = 'best-global';
-
-function getBestForDate(dateStr) {
-  const v = localStorage.getItem(bestKeyForDate(dateStr));
-  return v ? Number(v) : null;
-}
-function setBestForDate(dateStr, seconds) {
-  localStorage.setItem(bestKeyForDate(dateStr), String(seconds));
-}
-function getBestGlobal() {
-  const v = localStorage.getItem(globalKey);
-  return v ? Number(v) : null;
-}
-function setBestGlobal(seconds) {
-  localStorage.setItem(globalKey, String(seconds));
-}
-
-/* -----------------------------
-   Format seconds -> mm:ss or Xs
-------------------------------*/
-function fmtSeconds(s) {
-  if (s >= 60) {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${String(sec).padStart(2,'0')}`;
-  }
-  return `${s}s`;
-}
-
-/* -----------------------------
-   When solved
-------------------------------*/
-function onSolved() {
-  const secs = stopTimerAndGetSecondsRounded();
-  // determine date string to use for daily best keys. Use dailySeedStr (which is UTC date string)
-  const dateKey = dailySeedStr || toUTCYYYYMMDD(new Date());
-  // update daily best
-  const prevBest = getBestForDate(dateKey);
-  if (prevBest === null || secs < prevBest) {
-    setBestForDate(dateKey, secs);
-  }
-  // update global best
-  const prevGlobal = getBestGlobal();
-  if (prevGlobal === null || secs < prevGlobal) {
-    setBestGlobal(secs);
-  }
-
-  // populate modal
-  solvedTimeEl.textContent = fmtSeconds(secs);
-  const bestToday = getBestForDate(dateKey);
-  bestTodayEl.textContent = `Today's best: ${bestToday !== null ? fmtSeconds(bestToday) : '—'}`;
-  const bestGlobal = getBestGlobal();
-  bestGlobalEl.textContent = `All-time best: ${bestGlobal !== null ? fmtSeconds(bestGlobal) : '—'}`;
-
-  // show modal
-  backdrop.style.display = 'flex';
-  // small delay to allow CSS transition
-  requestAnimationFrame(() => modal.classList.add('show'));
-}
-
-/* -----------------------------
-   Modal controls
-------------------------------*/
-function hideModal() {
-  modal.classList.remove('show');
-  setTimeout(() => backdrop.style.display = 'none', 240);
-}
-playAgainBtn.addEventListener('click', () => {
-  // reset to same deterministic daily scramble so replay is identical
-  initTilesSolved();
-  deterministicShuffle();
-  renderTiles();
-  hideModal();
-});
-closeModalBtn.addEventListener('click', () => {
-  hideModal();
-});
-
-/* -----------------------------
-   Share functions
-------------------------------*/
-async function shareScore(seconds, dateStr) {
-  const url = `${location.origin}${location.pathname}?score=${seconds}&d=${dateStr}`;
-  const msg = `I solved today's sliding puzzle in ${seconds}s! Can you beat me? ${url}`;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: 'Daily Sliding Puzzle', text: msg, url });
-      return;
-    } catch (e) {
-      // share canceled/fails, fallback to copy
+    if (i === tileCount - 1) {
+      tile.classList.add("empty");
+    } else {
+      const x = i % gridSize;
+      const y = Math.floor(i / gridSize);
+      const percentX = (x / (gridSize - 1)) * 100;
+      const percentY = (y / (gridSize - 1)) * 100;
+      tile.style.backgroundImage = `url(${imageURL})`;
+      tile.style.backgroundPosition = `${percentX}% ${percentY}%`;
     }
+
+    tile.dataset.index = i;
+    tile.addEventListener("click", () => tryMove(i));
+    puzzleEl.appendChild(tile);
+    tiles.push(tile);
   }
-  // fallback: copy to clipboard
-  try {
-    await navigator.clipboard.writeText(msg);
-    alert('Share text copied to clipboard!');
-  } catch (e) {
-    prompt('Copy this link/message:', msg);
+
+  emptyIndex = tileCount - 1;
+  shuffleTiles();
+}
+
+// ------------------------------------------------------
+// Shuffle with reversible moves
+// ------------------------------------------------------
+function shuffleTiles() {
+  const rand = seededRandom(dailySeed);
+
+  for (let i = 0; i < 200; i++) {
+    const neighbors = getNeighbors(emptyIndex);
+    const moveIndex = neighbors[Math.floor(rand() * neighbors.length)];
+    swapTiles(moveIndex, emptyIndex);
+    emptyIndex = moveIndex;
   }
 }
 
-/* share button in controls uses current time (if running or last shown) */
-shareBtn.addEventListener('click', async () => {
-  const secs = Math.round(Number(timeEl.textContent) || 0);
-  const dateStr = dailySeedStr || toUTCYYYYMMDD(new Date());
-  await shareScore(secs, dateStr);
-});
-modalShareBtn.addEventListener('click', async () => {
-  // modal shows solved seconds text; parse
-  const display = solvedTimeEl.textContent;
-  // convert "1:23" or "38s" to seconds integer
-  let secs = 0;
-  if (display.includes(':')) {
-    const parts = display.split(':').map(Number);
-    secs = parts[0]*60 + parts[1];
+// ------------------------------------------------------
+function getNeighbors(index) {
+  const neighbors = [];
+  const x = index % gridSize;
+  const y = Math.floor(index / gridSize);
+
+  if (x > 0) neighbors.push(index - 1);
+  if (x < gridSize - 1) neighbors.push(index + 1);
+  if (y > 0) neighbors.push(index - gridSize);
+  if (y < gridSize - 1) neighbors.push(index + gridSize);
+
+  return neighbors;
+}
+
+function swapTiles(a, b) {
+  const temp = tiles[a].className;
+  const tempBG = tiles[a].style.cssText;
+
+  tiles[a].className = tiles[b].className;
+  tiles[a].style.cssText = tiles[b].style.cssText;
+
+  tiles[b].className = temp;
+  tiles[b].style.cssText = tempBG;
+}
+
+// ------------------------------------------------------
+// Handle moves
+// ------------------------------------------------------
+function tryMove(i) {
+  if (!startTime) startTimer();
+
+  if (!getNeighbors(emptyIndex).includes(i)) return;
+
+  swapTiles(i, emptyIndex);
+  emptyIndex = i;
+
+  checkSolved();
+}
+
+// ------------------------------------------------------
+function startTimer() {
+  startTime = performance.now();
+  timerInterval = setInterval(() => {
+    const elapsed = (performance.now() - startTime) / 1000;
+    timerEl.textContent = `Time: ${elapsed.toFixed(2)}`;
+  }, 50);
+}
+
+// ------------------------------------------------------
+function stopTimer() {
+  clearInterval(timerInterval);
+  const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+  return elapsed;
+}
+
+// ------------------------------------------------------
+// Check solved
+// ------------------------------------------------------
+function checkSolved() {
+  for (let i = 0; i < tileCount - 1; i++) {
+    const pos = tiles[i].dataset.index;
+    if (Number(pos) !== i) return false;
+  }
+
+  const final = stopTimer();
+  finalTimeEl.textContent = `Your time: ${final}s`;
+
+  updateBestTime(final);
+  modal.style.display = "flex";
+}
+
+// ------------------------------------------------------
+// LocalStorage best time
+// ------------------------------------------------------
+function updateBestTime(newTime) {
+  const key = "puzzle-best-time";
+  const old = localStorage.getItem(key);
+
+  if (!old || Number(newTime) < Number(old)) {
+    localStorage.setItem(key, newTime);
+  }
+
+  renderBestTime();
+}
+
+function renderBestTime() {
+  const best = localStorage.getItem("puzzle-best-time");
+  if (best) bestTimeEl.textContent = `Best time: ${best}s`;
+}
+
+// ------------------------------------------------------
+// Share button
+// ------------------------------------------------------
+shareBtn.addEventListener("click", async () => {
+  const finalTime = finalTimeEl.textContent;
+  const shareText = `I solved today's sliding puzzle! ${finalTime}  
+Play here: ${location.href}`;
+
+  if (navigator.share) {
+    navigator.share({ text: shareText });
   } else {
-    secs = Number(display.replace('s',''));
+    navigator.clipboard.writeText(shareText);
+    alert("Copied share text to clipboard!");
   }
-  const dateStr = dailySeedStr || toUTCYYYYMMDD(new Date());
-  await shareScore(secs, dateStr);
 });
 
-/* -----------------------------
-   Reset button: re-init and shuffle (daily deterministic)
-------------------------------*/
-resetBtn.addEventListener('click', () => {
-  initTilesSolved();
-  deterministicShuffle();
-  renderTiles();
-});
-
-/* -----------------------------
-   Init application flow
-------------------------------*/
-function initApp() {
-  loadImageForUTCDate(() => {
-    initTilesSolved();
-    deterministicShuffle();
-    renderTiles();
-  });
-}
-
-/* start */
-initApp();
-
+// ------------------------------------------------------
+// INIT
+// ------------------------------------------------------
+(async function init() {
+  renderBestTime();
+  await loadDailyImage();
+  buildPuzzle(todayImagePath);
+})();
 </script>
+
 </body>
 </html>
