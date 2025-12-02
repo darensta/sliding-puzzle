@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Tile Test</title>
+
+<style>
+body {
+  background: #111;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+}
+
+#grid {
+  width: 400px;
+  height: 400px;
+  margin: 30px auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  background: #000;
+}
+
+.tile {
+  background-size: 400% 400%;  /* prevents full image tiling */
+  background-repeat: no-repeat;
+}
+</style>
+
+</head>
+<body>
+
+<h2>Tile Test</h2>
+<p>This should show a 4×4 sliced image.</p>
+
+<div id="grid"></div>
+
+<script>
+const gridSize = 4;
+const imagePath = "/images/20251202.jpg";  // <--- CHANGE IF NEEDED
+
+const grid = document.getElementById("grid");
+
+function sliceImage() {
+  for (let i = 0; i < gridSize * gridSize; i++) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+
+    const x = i % gridSize;
+    const y = Math.floor(i / gridSize);
+
+    const percentX = (x / (gridSize - 1)) * 100;
+    const percentY = (y / (gridSize - 1)) * 100;
+
+    tile.style.backgroundImage = `url(${imagePath})`;
+    tile.style.backgroundPosition = `${percentX}% ${percentY}%`;
+
+    grid.appendChild(tile);
+  }
+}
+
+sliceImage();
+</script>
+
+</body>
+</html>
