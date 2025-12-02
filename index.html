@@ -3,128 +3,181 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Sliding Puzzle</title>
+  <title>Sliding Puzzle</title>
+
   <style>
-    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    #puzzle { width: 90vmin; height: 90vmin; max-width: 500px; max-height: 500px; display: grid; grid-template-columns: repeat(var(--gridSize), 1fr); grid-template-rows: repeat(var(--gridSize), 1fr); gap: 2px; }
-    .tile { background-size: 100% 100%; background-repeat: no-repeat; cursor: pointer; }
-    .empty { background: #eee; cursor: default; }
-    #timer { margin-top: 20px; font-size: 1.5rem; }
-    #share { margin-top: 20px; font-size: 1rem; }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f4f4f4;
+    }
+
+    #puzzle {
+      position: relative;
+      display: grid;
+      gap: 2px;
+      background: #333;
+      touch-action: manipulation;
+    }
+
+    .tile {
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .empty {
+      background: #222;
+    }
+
+    #timer {
+      margin-top: 20px;
+      font-size: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>Daily Sliding Puzzle</h1>
-  <div id="puzzle"></div>
-  <div id="timer">Time: 0s</div>
-  <button id="share">Share Score</button>
 
-  <script>
-    const gridSize = 4;
-    document.getElementById('puzzle').style.setProperty('--gridSize', gridSize);
+<h1>Sliding Puzzle</h1>
 
-    const puzzleEl = document.getElementById('puzzle');
-    const timerEl = document.getElementById('timer');
-    const shareBtn = document.getElementById('share');
+<div id="puzzle"></div>
+<div id="timer">Time: <span id="time">0.0</span>s</div>
 
-    let tiles = [];
-    let emptyIndex;
-    let startTime;
-    let timerInterval;
+<script>
+/* -----------------------------
+   CONFIG
+------------------------------ */
+const gridSize = 4;         // Change to 5 for 5×5
+const imageUrl =
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=60";
 
-    function getDailyImageUrl() {
-      const images = [
-        'https://picsum.photos/500?random=1',
-        'https://picsum.photos/500?random=2',
-        'https://picsum.photos/500?random=3',
-        'https://picsum.photos/500?random=4'
-      ];
-      const dayIndex = Math.floor(Date.now() / (24*60*60*1000));
-      return images[dayIndex % images.length];
+const tileCount = gridSize * gridSize;
+let tiles = [];
+let emptyIndex = tileCount - 1;
+
+let startTime = null;
+let timerRunning = false;
+
+/* -----------------------------
+   TIMER
+------------------------------ */
+function startTimer() {
+  if (!timerRunning) {
+    timerRunning = true;
+    startTime = performance.now();
+    updateTimer();
+  }
+}
+
+function updateTimer() {
+  if (!timerRunning) return;
+  const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+  document.getElementById("time").textContent = elapsed;
+  requestAnimationFrame(updateTimer);
+}
+
+/* -----------------------------
+   SETUP PUZZLE GRID
+------------------------------ */
+const puzzle = document.getElementById("puzzle");
+puzzle.style.width = "400px";
+puzzle.style.height = "400px";
+puzzle.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+puzzle.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+/* -----------------------------
+   CREATE TILES
+------------------------------ */
+function createTiles() {
+  const tileSizePercent = 100 / (gridSize - 1);
+
+  for (let i = 0; i < tileCount; i++) {
+    const tile = document.createElement("div");
+    tile.classList.add("tile");
+    tile.dataset.index = i;
+
+    if (i === emptyIndex) {
+      tile.classList.add("empty");
+    } else {
+      const x = (i % gridSize) * (100 / (gridSize - 1));
+      const y = Math.floor(i / gridSize) * (100 / (gridSize - 1));
+
+      tile.style.backgroundImage = `url("${imageUrl}")`;
+      tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+      tile.style.backgroundPosition = `-${(i % gridSize) * (100 / (gridSize))}% -${Math.floor(i / gridSize) * (100 / (gridSize))}%`;
     }
 
-    async function initPuzzle() {
-      const imgUrl = getDailyImageUrl();
-      tiles = [...Array(gridSize * gridSize).keys()];
-      emptyIndex = tiles.length - 1;
+    tile.addEventListener("click", () => tryMove(i));
 
-      // deterministic shuffle
-      const seed = new Date().toISOString().split('T')[0];
-      function seededRandom(s) { let x = s.split('').reduce((a,c)=>a+c.charCodeAt(0),0); return ()=> (x = (x*16807)%2147483647)/2147483647; }
-      const rand = seededRandom(seed);
-      for (let i = 0; i < 200; i++) {
-        const possible = getMovableTiles(emptyIndex);
-        const move = possible[Math.floor(rand()*possible.length)];
-        [tiles[emptyIndex], tiles[move]] = [tiles[move], tiles[emptyIndex]];
-        emptyIndex = move;
-      }
+    tiles.push(tile);
+    puzzle.appendChild(tile);
+  }
+}
 
-      renderTiles(imgUrl);
-      startTimer();
+/* -----------------------------
+   NEIGHBOR CHECK
+------------------------------ */
+function isNeighbor(i1, i2) {
+  const r1 = Math.floor(i1 / gridSize);
+  const c1 = i1 % gridSize;
+  const r2 = Math.floor(i2 / gridSize);
+  const c2 = i2 % gridSize;
+
+  return (r1 === r2 && Math.abs(c1 - c2) === 1) ||
+         (c1 === c2 && Math.abs(r1 - r2) === 1);
+}
+
+/* -----------------------------
+   MOVE LOGIC
+------------------------------ */
+function tryMove(i) {
+  if (!isNeighbor(i, emptyIndex)) return;
+  startTimer();
+
+  const clicked = tiles[i];
+  const empty = tiles[emptyIndex];
+
+  // Swap backgrounds
+  empty.style.backgroundImage = clicked.style.backgroundImage;
+  empty.style.backgroundPosition = clicked.style.backgroundPosition;
+  empty.classList.remove("empty");
+
+  clicked.style.backgroundImage = "";
+  clicked.classList.add("empty");
+
+  emptyIndex = i;
+}
+
+/* -----------------------------
+   SHUFFLE
+------------------------------ */
+function shuffle() {
+  let moves = 200;
+  while (moves > 0) {
+    const neighbors = [];
+    for (let i = 0; i < tileCount; i++) {
+      if (isNeighbor(i, emptyIndex)) neighbors.push(i);
     }
+    const move = neighbors[Math.floor(Math.random() * neighbors.length)];
+    tryMove(move);
+    moves--;
+  }
+  timerRunning = false;
+  document.getElementById("time").textContent = "0.0";
+}
 
-    function renderTiles(imgUrl) {
-      puzzleEl.innerHTML = '';
-      tiles.forEach((tile, index) => {
-        const div = document.createElement('div');
-        if (index === emptyIndex) {
-          div.className = 'tile empty';
-        } else {
-          div.className = 'tile';
-          const x = tile % gridSize;
-          const y = Math.floor(tile / gridSize);
-          div.style.backgroundImage = `url(${imgUrl})`;
-          div.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
-          div.style.backgroundPosition = `${(x / (gridSize - 1)) * 100}% ${(y / (gridSize - 1)) * 100}%`;
-        }
-        div.addEventListener('click', () => handleTileClick(index));
-        puzzleEl.appendChild(div);
-      });
-    }
+/* -----------------------------
+   INIT
+------------------------------ */
+createTiles();
+shuffle();
+</script>
 
-    function getMovableTiles(empty) {
-      const moves = [];
-      const row = Math.floor(empty / gridSize);
-      const col = empty % gridSize;
-      if (row > 0) moves.push(empty - gridSize);
-      if (row < gridSize - 1) moves.push(empty + gridSize);
-      if (col > 0) moves.push(empty - 1);
-      if (col < gridSize - 1) moves.push(empty + 1);
-      return moves;
-    }
-
-    function handleTileClick(index) {
-      const movable = getMovableTiles(emptyIndex);
-      if (!movable.includes(index)) return;
-      [tiles[emptyIndex], tiles[index]] = [tiles[index], tiles[emptyIndex]];
-      emptyIndex = index;
-      renderTiles(getDailyImageUrl());
-      if (isSolved()) stopTimer();
-    }
-
-    function isSolved() {
-      return tiles.every((v,i)=>v===i);
-    }
-
-    function startTimer() {
-      startTime = Date.now();
-      timerInterval = setInterval(() => {
-        const secs = Math.floor((Date.now() - startTime)/1000);
-        timerEl.textContent = `Time: ${secs}s`;
-      }, 200);
-    }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
-      const secs = Math.floor((Date.now() - startTime)/1000);
-      shareBtn.onclick = () => {
-        const url = window.location.origin + window.location.pathname + `?score=${secs}`;
-        navigator.clipboard.writeText(url);
-        alert('Score link copied to clipboard!');
-      };
-    }
-
-    initPuzzle();
-  </script>
 </body>
 </html>
