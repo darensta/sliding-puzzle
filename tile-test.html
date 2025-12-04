@@ -38,31 +38,16 @@ body {
 <div id="grid"></div>
 
 <script>
-const gridSize = 4;
-const imagePath = "/images/20251204.jpg";  // <--- CHANGE IF NEEDED
-
 const grid = document.getElementById("grid");
 
-function sliceImage() {
-  for (let i = 0; i < gridSize * gridSize; i++) {
-    const tile = document.createElement("div");
-    tile.className = "tile";
-
-    const x = i % gridSize;
-    const y = Math.floor(i / gridSize);
-
-    const percentX = (x / (gridSize - 1)) * 100;
-    const percentY = (y / (gridSize - 1)) * 100;
-
-    tile.style.backgroundImage = `url(${imagePath})`;
-    tile.style.backgroundPosition = `${percentX}% ${percentY}%`;
-
-    grid.appendChild(tile);
-  }
-}
-
-sliceImage();
+// Create 1 visible red tile
+const tile = document.createElement("div");
+tile.style.background = "red";
+tile.style.width = "100%";
+tile.style.height = "100%";
+grid.appendChild(tile);
 </script>
+
 <img src="/images/20251204.jpg">
 </body>
 </html>
