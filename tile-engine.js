@@ -1,15 +1,13 @@
-/* ============================================================
-   Sliding Puzzle Engine - Standalone File
-   Author: ChatGPT
-   ============================================================ */
+/* Sliding Puzzle Engine */
 
 const PUZZLE_SIZE = 4;
-const GRID_PX = 400;           // Square grid size
+const GRID_PX = 400;
 const TILE_PX = GRID_PX / PUZZLE_SIZE;
-const IMAGE_PATH = "images/20251204.jpg";  // Replace dynamically later
+
+const IMAGE_PATH = "images/20251204.jpg"; // replace when adding daily image feature
 
 let board = [];
-let blankPos = { row: 0, col: 0 }; // blank tile at TOP-LEFT
+let blankPos = { row: 0, col: 0 };
 let gridEl;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -18,29 +16,23 @@ document.addEventListener("DOMContentLoaded", () => {
   renderBoard();
 });
 
-/* ----------------------------
-   Initialize board
------------------------------ */
 function initBoard() {
   board = [];
-  let index = 0;
+  let idx = 0;
 
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     board[r] = [];
     for (let c = 0; c < PUZZLE_SIZE; c++) {
       if (r === 0 && c === 0) {
-        board[r][c] = null;       // blank
+        board[r][c] = null;
         blankPos = { row: 0, col: 0 };
       } else {
-        board[r][c] = index++;
+        board[r][c] = idx++;
       }
     }
   }
 }
 
-/* ----------------------------
-   Render tiles on screen
------------------------------ */
 function renderBoard() {
   gridEl.innerHTML = "";
 
@@ -58,7 +50,6 @@ function renderBoard() {
         const srcCol = tileIndex % PUZZLE_SIZE;
 
         tile.style.backgroundImage = `url(${IMAGE_PATH})`;
-        tile.style.backgroundSize = `${GRID_PX}px ${GRID_PX}px`;
         tile.style.backgroundPosition =
           `-${srcCol * TILE_PX}px -${srcRow * TILE_PX}px`;
 
@@ -72,20 +63,13 @@ function renderBoard() {
   }
 }
 
-/* ----------------------------
-   Tile sliding logic
------------------------------ */
 function tileClicked(r, c) {
   const dr = Math.abs(r - blankPos.row);
   const dc = Math.abs(c - blankPos.col);
-
-  // Only adjacent tiles slide
   if (dr + dc !== 1) return;
 
-  // Swap tile with blank
   board[blankPos.row][blankPos.col] = board[r][c];
   board[r][c] = null;
-
   blankPos = { row: r, col: c };
 
   renderBoard();
