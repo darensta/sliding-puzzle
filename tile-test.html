@@ -3,51 +3,61 @@
 <head>
 <meta charset="UTF-8" />
 <title>Tile Test</title>
-
 <style>
-body {
-  background: #111;
-  color: white;
-  font-family: Arial;
-  text-align: center;
-}
-
-#grid {
-  width: 400px;
-  height: 400px;
-  margin: 30px auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 2px;
-  background: #000;
-}
-
-.tile {
-  background-size: 400% 400%;  /* prevents full image tiling */
-  background-repeat: no-repeat;
-}
+    body {
+        background: #111;
+        color: white;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        padding: 30px;
+    }
+    #grid {
+        width: 400px;
+        height: 400px;
+        margin: 30px auto;
+        display: flex;
+        flex-wrap: wrap;
+        background: #000;
+    }
+    .tile {
+        width: 25%;    /* 4×4 */
+        height: 25%;
+        background-size: 400px 400px;
+        background-repeat: no-repeat;
+    }
 </style>
-
 </head>
 <body>
 
-<h2>Tile Test</h2>
+<h1>Tile Test</h1>
 <p>This should show a 4×4 sliced image.</p>
 
 <div id="grid"></div>
 
 <script>
-const grid = document.getElementById("grid");
+const GRID = 4;
+const imageUrl = "images/20251204.jpg";   // ✅ FIXED
 
-// Create 1 visible red tile
-const tile = document.createElement("div");
-tile.style.background = "red";
-tile.style.width = "100%";
-tile.style.height = "100%";
-grid.appendChild(tile);
+// Load image first
+const img = new Image();
+img.src = imageUrl;
+
+img.onload = () => {
+    const grid = document.getElementById("grid");
+
+    for (let y = 0; y < GRID; y++) {
+        for (let x = 0; x < GRID; x++) {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.style.backgroundImage = `url(${imageUrl})`;
+            tile.style.backgroundPosition = 
+                `-${(400 / GRID) * x}px -${(400 / GRID) * y}px`;
+
+            grid.appendChild(tile);
+        }
+    }
+};
 </script>
 
-<img src="/images/20251204.jpg">
 </body>
 </html>
