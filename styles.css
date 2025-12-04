@@ -1,0 +1,18 @@
+#grid {
+  width: 400px;
+  height: 400px;
+  margin: 40px auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  background: #222;
+}
+
+.tile {
+  border: 2px solid rgba(255,255,255,0.2); /* thicker lines */
+  background-repeat: no-repeat;
+}
+
+.tile.empty {
+  background: #111 !important;
+}
