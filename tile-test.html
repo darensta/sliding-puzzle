@@ -1,32 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Tile Test</title>
+
 <style>
-    body {
-        background: #111;
-        color: white;
-        text-align: center;
-        font-family: Arial, sans-serif;
-        padding: 30px;
-    }
-    #grid {
-        width: 400px;
-        height: 400px;
-        margin: 30px auto;
-        display: flex;
-        flex-wrap: wrap;
-        background: #000;
-    }
-    .tile {
-        width: 25%;    /* 4×4 */
-        height: 25%;
-        background-size: 400px 400px;
-        background-repeat: no-repeat;
-    }
+body { 
+  background: #111; 
+  color: white; 
+  text-align: center; 
+  font-family: sans-serif;
+}
+
+#grid {
+  width: 400px;
+  height: 400px;
+  margin: 40px auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  background: #222;
+  gap: 0;
+}
+
+.tile {
+  background-size: 400px 400px;
+  background-repeat: no-repeat;
+  border: 1px solid #0003;
+}
+
+/* empty tile */
+.tile.empty {
+  background: none !important;
+}
 </style>
 </head>
+
 <body>
 
 <h1>Tile Test</h1>
@@ -35,28 +44,32 @@
 <div id="grid"></div>
 
 <script>
-const GRID = 4;
-const imageUrl = "images/20251204.jpg";   // ✅ FIXED
+const imgSrc = "images/20251204.jpg";   // works on your site
+const gridSize = 4;
+const container = document.getElementById("grid");
 
-// Load image first
-const img = new Image();
-img.src = imageUrl;
+function buildGrid() {
+  for (let index = 0; index < gridSize * gridSize; index++) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
 
-img.onload = () => {
-    const grid = document.getElementById("grid");
+    // Last tile = empty
+    if (index === gridSize * gridSize - 1) {
+      tile.classList.add("empty");
+    } else {
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
 
-    for (let y = 0; y < GRID; y++) {
-        for (let x = 0; x < GRID; x++) {
-            const tile = document.createElement("div");
-            tile.className = "tile";
-            tile.style.backgroundImage = `url(${imageUrl})`;
-            tile.style.backgroundPosition = 
-                `-${(400 / GRID) * x}px -${(400 / GRID) * y}px`;
-
-            grid.appendChild(tile);
-        }
+      tile.style.backgroundImage = `url(${imgSrc})`;
+      tile.style.backgroundPosition = 
+        `-${col * 100}px -${row * 100}px`;
     }
-};
+
+    container.appendChild(tile);
+  }
+}
+
+buildGrid();
 </script>
 
 </body>
