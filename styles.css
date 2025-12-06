@@ -32,6 +32,75 @@ body {
   text-decoration: underline;
 }
 
+/* ======================================================
+   EDMUNDS HEADER STYLE (Clean + Non-infringing)
+====================================================== */
+
+.ed-header {
+  background: #0077e6;      /* Edmunds blue */
+  color: white;
+  padding: 12px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+/* Left section: logo + menu */
+.ed-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Logo image (placeholder SVG recommended) */
+.ed-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+/* "edmunds" wordmark */
+.ed-wordmark {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation links */
+.ed-nav {
+  display: flex;
+  gap: 25px;
+}
+
+.ed-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.ed-nav a:hover {
+  text-decoration: underline;
+}
+
+/* Right icons */
+.ed-right {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 20px;
+}
+
+.ed-icon {
+  cursor: pointer;
+  opacity: 0.95;
+}
+
+.ed-icon:hover {
+  opacity: 1;
+}
+
 /* -----------------------------
    MAIN CONTENT
 ------------------------------ */
