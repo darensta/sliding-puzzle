@@ -1,24 +1,26 @@
-/* GLOBAL */
+/* ============================================================
+   GLOBAL
+============================================================ */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f5f5f5;
 }
 
-/* ===============================
-   EDMUNDS-LIKE HEADER
-=============================== */
+/* ============================================================
+   EDMUNDS-STYLE HEADER (CENTERED)
+============================================================ */
 .ed-header {
   background: #0077e6;
   color: white;
   padding: 12px 25px;
   display: flex;
-  justify-content: center;   /* centers the entire header content */
+  justify-content: center;          /* Center the logo + nav */
   align-items: center;
-  position: relative;
+  position: relative;               /* Needed for right-side icons */
 }
 
-/* keeps icons on the right edge while nav stays centered */
+/* Icons stay pinned to the right edge */
 .ed-right {
   position: absolute;
   right: 25px;
@@ -35,6 +37,7 @@ body {
   align-items: center;
   gap: 20px;
 }
+
 .ed-logo {
   height: 28px;
 }
@@ -43,37 +46,43 @@ body {
   font-weight: 600;
   letter-spacing: 0.4px;
 }
+
 .ed-nav {
   display: flex;
   gap: 25px;
 }
+
 .ed-nav a {
   color: white;
   text-decoration: none;
   font-size: 15px;
   font-weight: 500;
 }
+
 .ed-nav a:hover {
   text-decoration: underline;
 }
-.ed-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 20px;
-}
+
 .ed-icon {
   cursor: pointer;
 }
 
-/* ===============================
-   MAIN CONTENT + SCRAMBLE BUTTON
-=============================== */
+/* ============================================================
+   MAIN CONTENT AREA
+============================================================ */
 main {
   padding: 40px 20px;
   text-align: center;
 }
 
+/* Difficulty dropdown */
+#difficulty {
+  padding: 8px 14px;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* Scramble button */
 #scrambleBtn {
   padding: 12px 20px;
   background: #0077e6;
@@ -84,35 +93,42 @@ main {
   cursor: pointer;
   margin-bottom: 20px;
 }
+
 #scrambleBtn:hover {
   background: #005bb5;
 }
 
-/* ===============================
-   PUZZLE GRID
-=============================== */
+/* ============================================================
+   PUZZLE GRID — SMOOTH ANIMATED SLIDING
+============================================================ */
 #grid {
   width: 400px;
   height: 400px;
   margin: 30px auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  position: relative;                /* Required for absolute-position tiles */
   background: #222;
+  border: 2px solid #000;
 }
 
+/* Tiles are absolutely positioned and slide smoothly */
 .tile {
-  border: 2px solid #000;          /* black grid lines */
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #000;
   background-size: 400px 400px;
   background-repeat: no-repeat;
+  transition: transform 0.22s ease;  /* Smooth motion */
+  box-sizing: border-box;
 }
+
 .tile.empty {
   background: #000 !important;
 }
 
-/* ===============================
-   EDMUNDS-LIKE FOOTER (if you already created footer.html)
-=============================== */
+/* ============================================================
+   FOOTER (EDMUNDS-LIKE)
+============================================================ */
 .ed-footer {
   background: #002E5D;
   color: white;
@@ -146,6 +162,7 @@ main {
   text-decoration: none;
   font-size: 15px;
 }
+
 .ed-footer-col a:hover {
   text-decoration: underline;
 }
