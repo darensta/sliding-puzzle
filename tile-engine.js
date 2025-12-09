@@ -137,28 +137,49 @@ function moveBlank(dir) {
   if (dir === "right" && col < PUZZLE_SIZE - 1) swapTiles(row, col + 1, row, col);
 }
 
-function scramblePuzzle(moveCount = 3) {
+function scramblePuzzle(moveCount = SCRAMBLE_MOVES) {
   if (isScrambling) return;
   isScrambling = true;
 
-  let lastDir = null;
   let movesLeft = moveCount;
+  let lastTileMoved = null;  // NEW: track the tile, not the direction
 
   function doMove() {
     const legal = getLegalMoves();
 
-    // Rule: no same direction twice in a row
-    const filtered = legal.filter(dir => dir !== lastDir);
-    const choice = filtered[Math.floor(Math.random() * filtered.length)];
+    // Determine which tiles are adjacent and would be moved
+    const legalWithTiles = legal.map(dir => {
+      let targetR = blankPos.row;
+      let targetC = blankPos.col;
 
-    moveBlank(choice);
-    lastDir = choice;
+      if (dir === "up")    targetR = blankPos.row - 1;
+      if (dir === "down")  targetR = blankPos.row + 1;
+      if (dir === "left")  targetC = blankPos.col - 1;
+      if (dir === "right") targetC = blankPos.col + 1;
+
+      return { dir, tile: board[targetR][targetC] };
+    });
+
+    // EXCLUDE last tile moved
+    const filtered = legalWithTiles.filter(m => m.tile !== lastTileMoved);
+
+    // If filtering removes everything, fall back to full list
+    const options = filtered.length > 0 ? filtered : legalWithTiles;
+
+    const choice = options[Math.floor(Math.random() * options.length)];
+
+    // Move the blank (swap with selected tile)
+    moveBlank(choice.dir);
+
+    // Remember the tile that just moved
+    lastTileMoved = choice.tile;
+
     renderBoard();
 
     movesLeft--;
 
     if (movesLeft > 0) {
-      setTimeout(doMove, 250);  // visible animation
+      setTimeout(doMove, 250); // visible animation
     } else {
       isScrambling = false;
     }
@@ -166,3 +187,4 @@ function scramblePuzzle(moveCount = 3) {
 
   doMove();
 }
+
