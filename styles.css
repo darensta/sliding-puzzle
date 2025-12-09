@@ -1,173 +1,102 @@
-/* GLOBAL PAGE STYLE */
+/* GLOBAL */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f5f5f5;
 }
 
-/* -----------------------------
-   HEADER
------------------------------- */
-.site-header {
-  background: #002E5D;
-  color: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.site-header .logo {
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.site-header nav a {
-  color: white;
-  margin-left: 20px;
-  text-decoration: none;
-}
-
-.site-header nav a:hover {
-  text-decoration: underline;
-}
-
-/* ======================================================
-   EDMUNDS HEADER STYLE (Clean + Non-infringing)
-====================================================== */
-
+/* ===============================
+   HEADER (from previous step)
+=============================== */
 .ed-header {
-  background: #0077e6;      /* Edmunds blue */
+  background: #0077e6;
   color: white;
   padding: 12px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: Arial, sans-serif;
 }
-
-/* Left section: logo + menu */
 .ed-left {
   display: flex;
   align-items: center;
   gap: 20px;
 }
-
-/* Logo image (placeholder SVG recommended) */
 .ed-logo {
   height: 28px;
-  width: auto;
-  display: block;
 }
-
-/* "edmunds" wordmark */
 .ed-wordmark {
   font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: bold;
 }
-
-/* Navigation links */
 .ed-nav {
   display: flex;
   gap: 25px;
 }
-
 .ed-nav a {
   color: white;
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
 }
-
 .ed-nav a:hover {
   text-decoration: underline;
 }
-
-/* Right icons */
 .ed-right {
   display: flex;
-  align-items: center;
-  gap: 22px;
+  gap: 20px;
   font-size: 20px;
 }
 
-.ed-icon {
-  cursor: pointer;
-  opacity: 0.95;
-}
-
-.ed-icon:hover {
-  opacity: 1;
-}
-
-/* -----------------------------
+/* ===============================
    MAIN CONTENT
------------------------------- */
+=============================== */
 main {
   padding: 40px 20px;
   text-align: center;
 }
 
-/* Puzzle grid container */
+#scrambleBtn {
+  padding: 12px 20px;
+  background: #0077e6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+#scrambleBtn:hover {
+  background: #005bb5;
+}
+
+/* ===============================
+   PUZZLE GRID
+=============================== */
 #grid {
   width: 400px;
   height: 400px;
-  margin: 40px auto;
+  margin: 30px auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 0;
   background: #222;
 }
 
-/* Puzzle tile styling */
 .tile {
   border: 2px solid #000;
   background-size: 400px 400px;
   background-repeat: no-repeat;
 }
-
 .tile.empty {
   background: #000 !important;
 }
 
-/* -----------------------------
-   FOOTER
------------------------------- */
-.site-footer {
-  background: #002E5D;
-  color: white;
-  padding: 30px 20px;
-  margin-top: 60px;
-  font-size: 14px;
-}
-
-.site-footer a {
-  color: #9cc4ff;
-  text-decoration: none;
-}
-
-.site-footer a:hover {
-  text-decoration: underline;
-}
-
-.site-footer small {
-  display: block;
-  margin-top: 20px;
-  opacity: 0.7;
-  line-height: 1.5;
-}
-
-/* ======================================================
-   EDMUNDS FOOTER (Freestyle but visually accurate)
-====================================================== */
-
+/* ===============================
+   FOOTER (freestyle Edmunds)
+=============================== */
 .ed-footer {
   background: #002E5D;
   color: white;
   padding: 50px 25px;
-  font-family: Arial, sans-serif;
+  margin-top: 60px;
 }
 
 .ed-footer-top {
@@ -186,71 +115,51 @@ main {
 }
 
 .ed-footer-col h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: 600;
+  margin: 0;
+  font-size: 17px;
+  font-weight: bold;
 }
 
-/* Footer links */
 .ed-footer-col a {
   color: #c7dbff;
   text-decoration: none;
   font-size: 15px;
-  line-height: 1.4;
 }
-
 .ed-footer-col a:hover {
   text-decoration: underline;
 }
 
-/* Social icons */
 .ed-social-icons {
+  font-size: 22px;
   display: flex;
   gap: 10px;
-  font-size: 22px;
 }
 
-/* App store buttons */
 .ed-app-buttons {
   margin-top: 15px;
   display: flex;
-  gap: 12px;
   flex-direction: column;
+  gap: 12px;
 }
 
 .ed-app-btn {
   display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  align-items: center;
   background: #014a8f;
+  padding: 10px 12px;
   border-radius: 8px;
   text-decoration: none;
   color: white;
-  width: 200px;
 }
 
-.ed-app-btn img {
-  width: 32px;
-  height: 32px;
-}
-
-.ed-app-btn span {
-  font-size: 14px;
-  line-height: 1.2;
-}
-
-/* Divider */
 .ed-divider {
   border-top: 1px solid rgba(255,255,255,0.25);
   margin: 30px 0;
 }
 
-/* Legal text */
 .ed-legal {
   font-size: 13px;
-  line-height: 1.6;
   opacity: 0.8;
+  line-height: 1.5;
 }
-
