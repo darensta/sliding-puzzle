@@ -10,7 +10,7 @@ let blankPos = { row: 0, col: 0 };
 let gridEl;
 
 let isScrambling = false;
-let SCRAMBLE_MOVES = 1;
+let SCRAMBLE_MOVES = 3;
 
 document.addEventListener("DOMContentLoaded", () => {
   gridEl = document.getElementById("grid");
