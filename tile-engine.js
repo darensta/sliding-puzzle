@@ -7,6 +7,7 @@ const IMAGE_PATH = "images/20251204.jpg";
 
 let board = [];
 let blankPos = { row: 0, col: 0 };
+let gridEl;
 
 let isScrambling = false;
 let SCRAMBLE_MOVES = 3;
@@ -14,29 +15,31 @@ let SCRAMBLE_MOVES = 3;
 document.addEventListener("DOMContentLoaded", () => {
   gridEl = document.getElementById("grid");
 
-  initBoard();
-  renderBoard();
+  initBoard();     // start solved
+  renderBoard();   // show solved image with blank top-left
 
-  document
-    .getElementById("scrambleBtn")
-    .addEventListener("click", () => scramblePuzzle(SCRAMBLE_MOVES));
+  const btn = document.getElementById("scrambleBtn");
+  if (btn) {
+    btn.addEventListener("click", () => scramblePuzzle(SCRAMBLE_MOVES));
+  }
 });
 
 /* ----------------------------
    Initialize solved puzzle
+   Blank at (0,0), other tiles in order
 ----------------------------- */
 function initBoard() {
   board = [];
-  let index = 0;
+  let index = 0;  // 0..14
 
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     board[r] = [];
     for (let c = 0; c < PUZZLE_SIZE; c++) {
       if (r === 0 && c === 0) {
-        board[r][c] = null;
+        board[r][c] = null;                    // blank space
         blankPos = { row: 0, col: 0 };
       } else {
-        board[r][c] = index++;
+        board[r][c] = index++;                 // tile indices 0..14
       }
     }
   }
@@ -44,6 +47,9 @@ function initBoard() {
 
 /* ----------------------------
    Render the board
+   IMPORTANT FIX:
+   - tileIndex (0..14) corresponds to source tile 1..15
+   - so srcIndex = tileIndex + 1
 ----------------------------- */
 function renderBoard() {
   gridEl.innerHTML = "";
@@ -58,8 +64,9 @@ function renderBoard() {
       tile.style.height = TILE_PX + "px";
 
       if (tileIndex !== null) {
-        const srcRow = Math.floor(tileIndex / PUZZLE_SIZE);
-        const srcCol = tileIndex % PUZZLE_SIZE;
+        const srcIndex = tileIndex + 1;  // skip the blank slice
+        const srcRow = Math.floor(srcIndex / PUZZLE_SIZE);
+        const srcCol = srcIndex % PUZZLE_SIZE;
 
         tile.style.backgroundImage = `url(${IMAGE_PATH})`;
         tile.style.backgroundPosition =
@@ -84,6 +91,7 @@ function tileClicked(r, c) {
   const dr = Math.abs(r - blankPos.row);
   const dc = Math.abs(c - blankPos.col);
 
+  // must be adjacent to blank
   if (dr + dc !== 1) return;
 
   board[blankPos.row][blankPos.col] = board[r][c];
@@ -95,6 +103,10 @@ function tileClicked(r, c) {
 
 /* ----------------------------
    SCRAMBLE LOGIC
+   - Start from solved
+   - Perform legal moves
+   - No direction twice in a row
+   - Result is always solvable
 ----------------------------- */
 
 function getLegalMoves() {
@@ -134,6 +146,8 @@ function scramblePuzzle(moveCount = 3) {
 
   function doMove() {
     const legal = getLegalMoves();
+
+    // Rule: no same direction twice in a row
     const filtered = legal.filter(dir => dir !== lastDir);
     const choice = filtered[Math.floor(Math.random() * filtered.length)];
 
@@ -144,7 +158,7 @@ function scramblePuzzle(moveCount = 3) {
     movesLeft--;
 
     if (movesLeft > 0) {
-      setTimeout(doMove, 250);
+      setTimeout(doMove, 250);  // visible animation
     } else {
       isScrambling = false;
     }
