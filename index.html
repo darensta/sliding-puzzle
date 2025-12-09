@@ -14,28 +14,26 @@
 <div id="site-header"></div>
 
 <main>
-
   <h1>Sliding Puzzle Prototype</h1>
   <p>This is a proposed addition to Edmunds.com.</p>
 
   <button id="scrambleBtn">Scramble (3 moves)</button>
 
   <div id="grid"></div>
-
 </main>
 
 <!-- Footer injected here -->
 <div id="site-footer"></div>
 
 <script>
-/* Load header/footer fragments */
-fetch("header.html")
-  .then(r => r.text())
-  .then(html => document.getElementById("site-header").innerHTML = html);
+  // Load header + footer HTML fragments
+  fetch("header.html")
+    .then(r => r.text())
+    .then(html => document.getElementById("site-header").innerHTML = html);
 
-fetch("footer.html")
-  .then(r => r.text())
-  .then(html => document.getElementById("site-footer").innerHTML = html);
+  fetch("footer.html")
+    .then(r => r.text())
+    .then(html => document.getElementById("site-footer").innerHTML = html);
 </script>
 
 <script src="tile-engine.js"></script>
