@@ -6,7 +6,7 @@ body {
 }
 
 /* ===============================
-   HEADER (from previous step)
+   EDMUNDS-LIKE HEADER
 =============================== */
 .ed-header {
   background: #0077e6;
@@ -26,7 +26,8 @@ body {
 }
 .ed-wordmark {
   font-size: 22px;
-  font-weight: bold;
+  font-weight: 600;
+  letter-spacing: 0.4px;
 }
 .ed-nav {
   display: flex;
@@ -35,18 +36,24 @@ body {
 .ed-nav a {
   color: white;
   text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
 }
 .ed-nav a:hover {
   text-decoration: underline;
 }
 .ed-right {
   display: flex;
+  align-items: center;
   gap: 20px;
   font-size: 20px;
 }
+.ed-icon {
+  cursor: pointer;
+}
 
 /* ===============================
-   MAIN CONTENT
+   MAIN CONTENT + SCRAMBLE BUTTON
 =============================== */
 main {
   padding: 40px 20px;
@@ -81,7 +88,7 @@ main {
 }
 
 .tile {
-  border: 2px solid #000;
+  border: 2px solid #000;          /* black grid lines */
   background-size: 400px 400px;
   background-repeat: no-repeat;
 }
@@ -90,7 +97,7 @@ main {
 }
 
 /* ===============================
-   FOOTER (freestyle Edmunds)
+   EDMUNDS-LIKE FOOTER (if you already created footer.html)
 =============================== */
 .ed-footer {
   background: #002E5D;
