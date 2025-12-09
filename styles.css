@@ -13,9 +13,22 @@ body {
   color: white;
   padding: 12px 25px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;   /* centers the entire header content */
   align-items: center;
+  position: relative;
 }
+
+/* keeps icons on the right edge while nav stays centered */
+.ed-right {
+  position: absolute;
+  right: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 20px;
+  font-size: 20px;
+}
+
 .ed-left {
   display: flex;
   align-items: center;
