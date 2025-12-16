@@ -1,52 +1,46 @@
-<!-- Filename: index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edmunds Puzzle Prototype</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=sync1">
 </head>
 
 <body>
+  <!-- Header injected here -->
+  <div id="site-header"></div>
 
-<!-- Header injected here -->
-<div id="site-header"></div>
+  <main>
+    <h1>Sliding Puzzle Prototype</h1>
+    <p>This is a proposed addition to Edmunds.com.</p>
 
-<main>
-  <h1>Sliding Puzzle Prototype</h1>
-  <p>This is a proposed addition to Edmunds.com.</p>
+    <select id="difficulty">
+      <option value="3">Easy</option>
+      <option value="10">Medium</option>
+      <option value="20">Hard</option>
+      <option value="50">Expert</option>
+    </select>
 
-  <select id="difficulty">
-  <option value="3">Easy</option>
-  <option value="10">Medium</option>
-  <option value="20">Hard</option>
-  <option value="50">Expert</option>
-</select>
+    <button id="scrambleBtn">Scramble</button>
 
-<button id="scrambleBtn">Scramble</button>
+    <div id="grid"></div>
+  </main>
 
+  <!-- Footer injected here -->
+  <div id="site-footer"></div>
 
+  <script>
+    fetch("header.html").then(r => r.text()).then(html => {
+      document.getElementById("site-header").innerHTML = html;
+    });
 
-  <div id="grid"></div>
-</main>
+    fetch("footer.html").then(r => r.text()).then(html => {
+      document.getElementById("site-footer").innerHTML = html;
+    });
+  </script>
 
-<!-- Footer injected here -->
-<div id="site-footer"></div>
-
-<script>
-  // Load header + footer HTML fragments
-  fetch("header.html")
-    .then(r => r.text())
-    .then(html => document.getElementById("site-header").innerHTML = html);
-
-  fetch("footer.html")
-    .then(r => r.text())
-    .then(html => document.getElementById("site-footer").innerHTML = html);
-</script>
-
-<script src="tile-engine.js"></script>
-
+  <script src="tile-engine.js?v=sync1"></script>
 </body>
 </html>
