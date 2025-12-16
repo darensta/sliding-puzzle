@@ -1,3 +1,4 @@
+/* Filename: tile-engine.js */
 /* Sliding Puzzle Engine - Smooth Animation */
 
 const PUZZLE_SIZE = 4;
