@@ -1,155 +1,156 @@
 /* Filename: tile-engine.js */
-/* Sliding Puzzle Engine - Smooth Animation */
+/* Sliding Puzzle Engine - Smooth Animation + Difficulty */
 
 const PUZZLE_SIZE = 4;
 const GRID_PX = 400;
 const TILE_PX = GRID_PX / PUZZLE_SIZE;
+
+// TODO later: swap to daily UTC image selection
 const IMAGE_PATH = "images/20251204.jpg";
 
-let board = [];
-let tileElements = [];
+let board = []; // 2D array storing tile values (0..14) or null for blank
 let blankPos = { row: 0, col: 0 };
+let tilesByValue = {}; // value -> DOM element
 
 let isScrambling = false;
 let SCRAMBLE_MOVES = 3;
 
+let gridEl;
+let difficultyEl;
+let scrambleBtn;
+
 document.addEventListener("DOMContentLoaded", () => {
   gridEl = document.getElementById("grid");
+  difficultyEl = document.getElementById("difficulty");
+  scrambleBtn = document.getElementById("scrambleBtn");
 
-  initBoard();
-  createTileElements();
-  updateTilePositions();
+  if (!gridEl || !difficultyEl || !scrambleBtn) {
+    console.error("Missing required elements: #grid, #difficulty, or #scrambleBtn");
+    return;
+  }
 
-  // Scramble button
-  document.getElementById("scrambleBtn")
-    .addEventListener("click", () => scramblePuzzle(SCRAMBLE_MOVES));
+  SCRAMBLE_MOVES = parseInt(difficultyEl.value, 10) || 3;
 
-  // Difficulty selector
-  document.getElementById("difficulty")
-    .addEventListener("change", (e) => {
-      SCRAMBLE_MOVES = parseInt(e.target.value, 10);
-    });
+  difficultyEl.addEventListener("change", (e) => {
+    SCRAMBLE_MOVES = parseInt(e.target.value, 10) || 3;
+  });
+
+  scrambleBtn.addEventListener("click", () => scramblePuzzle(SCRAMBLE_MOVES));
+
+  initBoardSolved();
+  createTilesOnce();
+  updateAllTileTransforms();
 });
 
 /* ----------------------------
-   Initialize solved puzzle
+   Start solved: blank in top-left
 ----------------------------- */
-function initBoard() {
+function initBoardSolved() {
   board = [];
-  let index = 0;
+  let value = 0;
 
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     board[r] = [];
     for (let c = 0; c < PUZZLE_SIZE; c++) {
       if (r === 0 && c === 0) {
-        board[r][c] = null; // blank
+        board[r][c] = null;
         blankPos = { row: 0, col: 0 };
       } else {
-        board[r][c] = index++;
+        board[r][c] = value++;
       }
     }
   }
 }
 
 /* ----------------------------
-   Create tile DOM elements
+   Create tile DOM elements ONCE
 ----------------------------- */
-function createTileElements() {
+function createTilesOnce() {
   gridEl.innerHTML = "";
-  tileElements = [];
+  tilesByValue = {};
 
+  for (let value = 0; value < (PUZZLE_SIZE * PUZZLE_SIZE - 1); value++) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.style.width = TILE_PX + "px";
+    tile.style.height = TILE_PX + "px";
+    tile.dataset.value = String(value);
+
+    // Map value (0..14) to image slice index (1..15), skipping the blank slice
+    const srcIndex = value + 1;
+    const srcRow = Math.floor(srcIndex / PUZZLE_SIZE);
+    const srcCol = srcIndex % PUZZLE_SIZE;
+
+    tile.style.backgroundImage = `url(${IMAGE_PATH})`;
+    tile.style.backgroundPosition = `-${srcCol * TILE_PX}px -${srcRow * TILE_PX}px`;
+
+    tile.addEventListener("click", () => {
+      if (isScrambling) return;
+      const v = parseInt(tile.dataset.value, 10);
+      const pos = findTile(v);
+      if (!pos) return;
+      tryMoveTile(pos.r, pos.c);
+    });
+
+    gridEl.appendChild(tile);
+    tilesByValue[value] = tile;
+  }
+}
+
+/* Find where a tile value currently is on the board */
+function findTile(value) {
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     for (let c = 0; c < PUZZLE_SIZE; c++) {
-      const tileIndex = board[r][c];
+      if (board[r][c] === value) return { r, c };
+    }
+  }
+  return null;
+}
 
-      const tile = document.createElement("div");
-      tile.className = "tile";
+/* Apply transforms for smooth positioning */
+function updateAllTileTransforms() {
+  for (let r = 0; r < PUZZLE_SIZE; r++) {
+    for (let c = 0; c < PUZZLE_SIZE; c++) {
+      const value = board[r][c];
+      if (value === null) continue;
+      const tileEl = tilesByValue[value];
+      if (!tileEl) continue;
 
-      tile.style.width = TILE_PX + "px";
-      tile.style.height = TILE_PX + "px";
-
-      if (tileIndex !== null) {
-        const srcIndex = tileIndex + 1;
-        const srcRow = Math.floor(srcIndex / PUZZLE_SIZE);
-        const srcCol = srcIndex % PUZZLE_SIZE;
-
-        tile.style.backgroundImage = `url(${IMAGE_PATH})`;
-        tile.style.backgroundPosition =
-          `-${srcCol * TILE_PX}px -${srcRow * TILE_PX}px`;
-
-        tile.addEventListener("click", () => tileClicked(r, c));
-      } else {
-        tile.classList.add("empty");
-      }
-
-      gridEl.appendChild(tile);
-      tileElements.push({ r, c, tile });
+      tileEl.style.transform = `translate(${c * TILE_PX}px, ${r * TILE_PX}px)`;
     }
   }
 }
 
-/* ----------------------------
-   Update transforms for animation
------------------------------ */
-function updateTilePositions() {
-  tileElements.forEach(te => {
-    const { r, c } = findTilePosition(te);
-    const x = c * TILE_PX;
-    const y = r * TILE_PX;
-    te.tile.style.transform = `translate(${x}px, ${y}px)`;
-  });
-}
-
-/* Find a tile's current location in board */
-function findTilePosition(tileElement) {
-  for (let r = 0; r < PUZZLE_SIZE; r++) {
-    for (let c = 0; c < PUZZLE_SIZE; c++) {
-      if (board[r][c] !== null &&
-          board[r][c] + 1 === tileElement.tile.dataset.index) {
-        return { r, c };
-      }
-    }
-  }
-  return { r: blankPos.row, c: blankPos.col };
-}
-
-/* ----------------------------
-   Tile click logic
------------------------------ */
-function tileClicked(r, c) {
-  if (isScrambling) return;
-
+/* Move logic for user clicks */
+function tryMoveTile(r, c) {
   const dr = Math.abs(r - blankPos.row);
   const dc = Math.abs(c - blankPos.col);
   if (dr + dc !== 1) return;
 
-  moveTile(r, c);
-  updateTilePositions();
+  moveTileIntoBlank(r, c);
+  updateAllTileTransforms();
 }
 
-/* ----------------------------
-   Move tile into the blank
------------------------------ */
-function moveTile(r, c) {
+function moveTileIntoBlank(r, c) {
   board[blankPos.row][blankPos.col] = board[r][c];
   board[r][c] = null;
   blankPos = { row: r, col: c };
 }
 
 /* ----------------------------
-   Scramble logic (smooth)
+   Scramble: legal moves from solved,
+   never move same tile twice in a row
 ----------------------------- */
-
-function getLegalMoves() {
-  const moves = [];
+function getBlankNeighbors() {
+  const n = [];
   const { row, col } = blankPos;
 
-  if (row > 0) moves.push({ r: row - 1, c: col });
-  if (row < PUZZLE_SIZE - 1) moves.push({ r: row + 1, c: col });
-  if (col > 0) moves.push({ r: row, c: col - 1 });
-  if (col < PUZZLE_SIZE - 1) moves.push({ r: row, c: col + 1 });
+  if (row > 0) n.push({ r: row - 1, c: col });
+  if (row < PUZZLE_SIZE - 1) n.push({ r: row + 1, c: col });
+  if (col > 0) n.push({ r: row, c: col - 1 });
+  if (col < PUZZLE_SIZE - 1) n.push({ r: row, c: col + 1 });
 
-  return moves;
+  return n;
 }
 
 function scramblePuzzle(moveCount) {
@@ -157,31 +158,34 @@ function scramblePuzzle(moveCount) {
   isScrambling = true;
 
   let movesLeft = moveCount;
-  let lastTile = null;
+  let lastTileValue = null;
 
-  function doMove() {
-    const legal = getLegalMoves();
+  function step() {
+    const neighbors = getBlankNeighbors();
 
-    const filtered = legal.filter(m => board[m.r][m.c] !== lastTile);
-
-    const choices = filtered.length ? filtered : legal;
+    const filtered = neighbors.filter(p => board[p.r][p.c] !== lastTileValue);
+    const choices = filtered.length ? filtered : neighbors;
 
     const choice = choices[Math.floor(Math.random() * choices.length)];
     const tileValue = board[choice.r][choice.c];
 
-    moveTile(choice.r, choice.c);
-    lastTile = tileValue;
+    moveTileIntoBlank(choice.r, choice.c);
+    lastTileValue = tileValue;
 
-    updateTilePositions();
+    updateAllTileTransforms();
 
     movesLeft--;
-
     if (movesLeft > 0) {
-      setTimeout(doMove, 250);
+      setTimeout(step, 220);
     } else {
       isScrambling = false;
     }
   }
 
-  doMove();
+  if (moveCount <= 0) {
+    isScrambling = false;
+    return;
+  }
+
+  step();
 }
