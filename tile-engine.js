@@ -412,10 +412,22 @@ async function solveWithAnimation() {
   const { moves, expansions } = solveAStar(start, goal);
 
   if (!moves) {
-    setDebugStatus(`No solution found (expansions: ${expansions}).`);
-    isSolving = false;
-    return;
-  }
+  /*
+  If you ever notice “No solution found” due to the expansion cap, we can:
+    • increase the cap, or
+    • switch to IDA* (memory-light, standard for 15-puzzle), or
+    • run the solver in a Web Worker to keep UI silky smooth.
+  */
+  console.warn(
+    "[Puzzle Solver] A* search terminated without a solution. " +
+    `Expanded ${expansions} states. This does NOT mean the puzzle is unsolvable.`
+  );
+
+  setDebugStatus(`No solution found (expansions: ${expansions}).`);
+  isSolving = false;
+  return;
+}
+
 
   setDebugStatus(`Solution found: ${moves.length} moves (expanded ${expansions}). Animating...`);
 
