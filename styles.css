@@ -203,6 +203,45 @@ main {
   line-height: 1.5;
 }
 
+/* ===============================
+   SOLVED PANEL
+=============================== */
+#solved-panel {
+  margin-top: 24px;
+  padding: 20px;
+  border: 2px solid #0077e6;
+  border-radius: 10px;
+  background: #ffffff;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#solved-panel h2 {
+  margin: 0 0 8px;
+  color: #0077e6;
+}
+
+#solved-panel p {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+#shareFbSolvedBtn {
+  padding: 12px 20px;
+  background: #1877f2; /* Facebook blue */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#shareFbSolvedBtn:hover {
+  background: #0f5fc4;
+}
+
+
 /* ============================================================
    Debug controls
 ============================================================ */
