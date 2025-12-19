@@ -202,3 +202,24 @@ main {
   opacity: 0.8;
   line-height: 1.5;
 }
+
+/* ============================================================
+   Debug controls
+============================================================ */
+
+#debug-controls {
+  margin-bottom: 18px;
+}
+
+#solveBtn {
+  padding: 12px 20px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+#solveBtn:hover { background: #111; }
+
