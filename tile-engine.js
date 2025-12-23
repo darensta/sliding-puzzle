@@ -1,20 +1,9 @@
-/* tile-engine.js */
+/* tile-engine.js
+   Coordinator / wiring only
+*/
 
-import {
-  initBoardSolved,
-  tryMoveTile,
-  findTile,
-  isSolved,
-  moveCount
-} from "./puzzle-state.js";
-
-import {
-  initRender,
-  createTilesOnce,
-  updateAllTileTransforms,
-  showSolvedPanel
-} from "./puzzle-render.js";
-
+import { state, initBoardSolved, tryMoveTile, findTile, isSolved } from "./puzzle-state.js";
+import { initRender, createTilesOnce, updateAllTileTransforms, showSolvedPanel } from "./puzzle-render.js";
 import { scramblePuzzle } from "./puzzle-scramble.js";
 import { solveWithAnimation } from "./puzzle-solver.js";
 
@@ -34,8 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
   grid.addEventListener("click", e => {
     const tile = e.target.closest(".tile");
     if (!tile) return;
+
     const value = parseInt(tile.dataset.value, 10);
     const pos = findTile(value);
+
     if (pos && tryMoveTile(pos.r, pos.c)) {
       updateAllTileTransforms();
       if (isSolved()) showSolvedPanel();
@@ -46,49 +37,42 @@ document.addEventListener("DOMContentLoaded", () => {
     shareBtn.addEventListener("click", () => {
       shareOnFacebook({
         url: window.location.href,
-        quote: `I just solved the Edmunds.com tile puzzle in ${moveCount} moves`
+        quote: `I just solved the Edmunds.com tile puzzle in ${state.moveCount} moves`
       });
     });
   }
 
   if (DEBUG_MODE) {
-  document.getElementById("debug-controls").style.display = "block";
+    const controls = document.getElementById("debug-controls");
+    const debugStatus = document.getElementById("debugStatus");
+    const scrambleBtn = document.getElementById("scrambleBtn");
+    const solveBtn = document.getElementById("solveBtn");
+    const difficultyEl = document.getElementById("difficulty");
 
-  const debugStatus = document.getElementById("debugStatus");
-  const scrambleBtn = document.getElementById("scrambleBtn");
-  const solveBtn = document.getElementById("solveBtn");
-  const difficultyEl = document.getElementById("difficulty");
+    if (controls) controls.style.display = "block";
 
-  // 🔹 Difficulty dropdown wiring (THIS FIXES THE BUG)
-  if (difficultyEl) {
-    SCRAMBLE_MOVES = parseInt(difficultyEl.value, 10) || 3;
+    if (difficultyEl) {
+      SCRAMBLE_MOVES = parseInt(difficultyEl.value, 10) || 3;
+      difficultyEl.addEventListener("change", e => {
+        SCRAMBLE_MOVES = parseInt(e.target.value, 10) || 3;
+        if (debugStatus) debugStatus.textContent = `Difficulty set to ${SCRAMBLE_MOVES} moves.`;
+      });
+    }
 
-    difficultyEl.addEventListener("change", e => {
-      SCRAMBLE_MOVES = parseInt(e.target.value, 10) || 3;
-      if (debugStatus) {
-        debugStatus.textContent =
-          `Difficulty set to ${SCRAMBLE_MOVES} moves.`;
-      }
-    });
+    if (scrambleBtn) {
+      scrambleBtn.addEventListener("click", () =>
+        scramblePuzzle(SCRAMBLE_MOVES, msg => {
+          if (debugStatus) debugStatus.textContent = msg;
+        })
+      );
+    }
+
+    if (solveBtn) {
+      solveBtn.addEventListener("click", () =>
+        solveWithAnimation(msg => {
+          if (debugStatus) debugStatus.textContent = msg;
+        })
+      );
+    }
   }
-
-  // 🔹 Scramble button
-  if (scrambleBtn) {
-    scrambleBtn.addEventListener("click", () =>
-      scramblePuzzle(SCRAMBLE_MOVES, msg => {
-        if (debugStatus) debugStatus.textContent = msg;
-      })
-    );
-  }
-
-  // 🔹 Solve button
-  if (solveBtn) {
-    solveBtn.addEventListener("click", () =>
-      solveWithAnimation(msg => {
-        if (debugStatus) debugStatus.textContent = msg;
-      })
-    );
-  }
-}
-
 });
