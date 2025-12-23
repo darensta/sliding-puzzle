@@ -2,19 +2,11 @@
    Dev-only debug UI + tools
 */
 
-console.log("PUZZLE DEBUG MODULE LOADED");
-const mount = document.getElementById("message");
-mount.innerHTML = "<div style='background:red;color:white;padding:20px;font-size:20px'>DEBUG MOUNT WORKS</div>";
-
-
-
 import { scramblePuzzle } from "./puzzle-scramble.js";
 import { solveWithAnimation } from "./puzzle-solver.js";
 
-let SCRAMBLE_MOVES = 3;
-
-(() => {
-  const mount = document.getElementById("__debug_mount");
+window.addEventListener("load", () => {
+  const mount = document.getElementById("message");
   if (!mount) return;
 
   mount.innerHTML = `
@@ -48,13 +40,12 @@ let SCRAMBLE_MOVES = 3;
   const solveBtn = document.getElementById("solveBtn");
   const difficultyEl = document.getElementById("difficulty");
 
-  if (difficultyEl) {
-    SCRAMBLE_MOVES = parseInt(difficultyEl.value, 10) || 3;
-    difficultyEl.addEventListener("change", e => {
-      SCRAMBLE_MOVES = parseInt(e.target.value, 10) || 3;
-      debugStatus.textContent = `Difficulty set to ${SCRAMBLE_MOVES} moves.`;
-    });
-  }
+  let SCRAMBLE_MOVES = parseInt(difficultyEl.value, 10) || 3;
+
+  difficultyEl.addEventListener("change", e => {
+    SCRAMBLE_MOVES = parseInt(e.target.value, 10) || 3;
+    debugStatus.textContent = `Difficulty set to ${SCRAMBLE_MOVES} moves.`;
+  });
 
   scrambleBtn.addEventListener("click", () =>
     scramblePuzzle(SCRAMBLE_MOVES, msg => debugStatus.textContent = msg)
@@ -63,4 +54,4 @@ let SCRAMBLE_MOVES = 3;
   solveBtn.addEventListener("click", () =>
     solveWithAnimation(msg => debugStatus.textContent = msg)
   );
-})();
+});
