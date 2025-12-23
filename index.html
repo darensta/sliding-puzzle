@@ -9,12 +9,13 @@
 </head>
 
 <body>
+
+  <header id="site-header"></header>
+
+<main id="app">
   <div id="message"></div>
 
-  <!-- Header injected here -->
-  <div id="site-header"></div>
-
-  <main>
+  <!-- puzzle UI stays here -->
     <h1>Sliding Puzzle Prototype</h1>
     <p>This is a proposed addition to Edmunds.com.</p>
 
@@ -44,29 +45,20 @@
       </button>
     </div>
 
-  </main>
 
   <!-- Footer injected here -->
-  <div id="site-footer"></div>
+
+  </main>
+
+<footer id="site-footer"></footer>
 
 <script>
-  fetch("header.html").then(r => r.text()).then(html => {
-    document.getElementById("site-header").innerHTML = html;
-  });
-
-  fetch("footer.html").then(r => r.text()).then(html => {
-    document.getElementById("site-footer").innerHTML = html;
-  });
-</script>
-
-
-  <script>
   window.__PUZZLE_DEBUG__ = true;
 </script>
 
-  <script type="module" src="tile-engine.js"></script>
-  <script src="share.js"></script>
+<script type="module" src="tile-engine.js"></script>
+<script src="share.js"></script>
+<script src="load-layout.js"></script>
 
-  
 </body>
 </html>
