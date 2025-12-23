@@ -4,7 +4,7 @@
 
 // 🔒 Production failsafe banner
 if (window.__PUZZLE_DEBUG__) {
-  const w = document.getElementById("debug-warning");
+  const w = document.getElementById("message");
   if (w) w.style.display = "block";
 }
 
