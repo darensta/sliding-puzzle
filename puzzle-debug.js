@@ -9,18 +9,22 @@ window.addEventListener("load", () => {
   const mount = document.getElementById("message");
   if (!mount) return;
 
-  mount.innerHTML = `
+    mount.insertAdjacentHTML("beforebegin", `
     <div style="
       background:#c40000;
       color:white;
       text-align:center;
-      font-size:20px;
+      font-size:22px;
       font-weight:900;
-      padding:12px;
-      margin-bottom:16px;
+      padding:14px;
+      letter-spacing:1px;
     ">
-      INTERNAL DEBUG MODE ACTIVE
+      🚨 DEBUG MODE IS AVAILABLE 🚨
     </div>
+  `);
+
+  mount.innerHTML = `
+
 
     <div id="debug-controls" style="text-align:center;margin-bottom:18px">
       <select id="difficulty">
