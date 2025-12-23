@@ -2,6 +2,13 @@
    Canonical production engine
 */
 
+// 🔒 Production failsafe banner
+if (window.__PUZZLE_DEBUG__) {
+  const w = document.getElementById("debug-warning");
+  if (w) w.style.display = "block";
+}
+
+
 import { state, initBoardSolved, tryMoveTile, findTile, isSolved } from "./puzzle-state.js";
 import { initRender, createTilesOnce, updateAllTileTransforms, showSolvedPanel } from "./puzzle-render.js";
 
