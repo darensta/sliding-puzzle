@@ -79,6 +79,7 @@ export function solveWithAnimation(setDebugStatus) {
   const MAX_EXPANSIONS = 200000;
 
   while (open.length && expansions < MAX_EXPANSIONS) {
+     expansions++;
     open.sort((a, b) => a.f - b.f);
     const current = open.shift();
 
