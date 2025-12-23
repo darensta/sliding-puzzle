@@ -1,6 +1,8 @@
 /* puzzle-debug.js
    Dev-only debug UI + tools
 */
+new MutationObserver(m => console.warn("DOM MUTATION", m))
+  .observe(document.documentElement, { childList:true, subtree:true });
 
 console.log("PUZZLE DEBUG VERSION 2025-A LOADED");
 window.addEventListener("load", () => {
