@@ -52,20 +52,43 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (DEBUG_MODE) {
-    document.getElementById("debug-controls").style.display = "block";
+  document.getElementById("debug-controls").style.display = "block";
 
-    document.getElementById("scrambleBtn")
-      ?.addEventListener("click", () =>
-        scramblePuzzle(SCRAMBLE_MOVES, msg =>
-          document.getElementById("debugStatus").textContent = msg
-        )
-      );
+  const debugStatus = document.getElementById("debugStatus");
+  const scrambleBtn = document.getElementById("scrambleBtn");
+  const solveBtn = document.getElementById("solveBtn");
+  const difficultyEl = document.getElementById("difficulty");
 
-    document.getElementById("solveBtn")
-      ?.addEventListener("click", () =>
-        solveWithAnimation(msg =>
-          document.getElementById("debugStatus").textContent = msg
-        )
-      );
+  // 🔹 Difficulty dropdown wiring (THIS FIXES THE BUG)
+  if (difficultyEl) {
+    SCRAMBLE_MOVES = parseInt(difficultyEl.value, 10) || 3;
+
+    difficultyEl.addEventListener("change", e => {
+      SCRAMBLE_MOVES = parseInt(e.target.value, 10) || 3;
+      if (debugStatus) {
+        debugStatus.textContent =
+          `Difficulty set to ${SCRAMBLE_MOVES} moves.`;
+      }
+    });
   }
+
+  // 🔹 Scramble button
+  if (scrambleBtn) {
+    scrambleBtn.addEventListener("click", () =>
+      scramblePuzzle(SCRAMBLE_MOVES, msg => {
+        if (debugStatus) debugStatus.textContent = msg;
+      })
+    );
+  }
+
+  // 🔹 Solve button
+  if (solveBtn) {
+    solveBtn.addEventListener("click", () =>
+      solveWithAnimation(msg => {
+        if (debugStatus) debugStatus.textContent = msg;
+      })
+    );
+  }
+}
+
 });
