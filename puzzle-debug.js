@@ -2,6 +2,9 @@
    Dev-only debug UI + tools
 */
 
+console.log("PUZZLE DEBUG MODULE LOADED");
+
+
 import { scramblePuzzle } from "./puzzle-scramble.js";
 import { solveWithAnimation } from "./puzzle-solver.js";
 
