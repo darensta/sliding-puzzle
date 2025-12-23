@@ -19,10 +19,10 @@ export function scramblePuzzle(count, setDebugStatus) {
     }
 
     const options = getBlankNeighbors()
-      .filter(p => board[p.r][p.c] !== lastTile);
+      .filter(p => state.board[p.r][p.c] !== lastTile);
 
     const choice = options[Math.floor(Math.random() * options.length)];
-    lastTile = board[choice.r][choice.c];
+    lastTile = state.board[choice.r][choice.c];
 
     moveTileIntoBlank(choice.r, choice.c);
     updateAllTileTransforms();
