@@ -1,6 +1,8 @@
-/* puzzle-render.js */
+/* puzzle-render.js
+   DOM + visual rendering only
+*/
 
-import { board } from "./puzzle-state.js";
+import { state } from "./puzzle-state.js";
 
 const GRID_PX = 400;
 const TILE_PX = GRID_PX / 4;
@@ -42,7 +44,7 @@ export function createTilesOnce() {
 export function updateAllTileTransforms() {
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
-      const v = board[r][c];
+      const v = state.board[r][c];
       if (v === null) continue;
       tilesByValue[v].style.transform =
         `translate(${c * TILE_PX}px, ${r * TILE_PX}px)`;
