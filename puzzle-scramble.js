@@ -3,7 +3,7 @@
 import {
   getBlankNeighbors,
   moveTileIntoBlank,
-  board
+  state
 } from "./puzzle-state.js";
 
 import { updateAllTileTransforms, hideSolvedPanel } from "./puzzle-render.js";
