@@ -2,6 +2,9 @@
    Dev-only debug UI + tools
 */
 
+console.log("PUZZLE DEBUG VERSION 2025-A LOADED");
+
+
 import { scramblePuzzle } from "./puzzle-scramble.js";
 import { solveWithAnimation } from "./puzzle-solver.js";
 
