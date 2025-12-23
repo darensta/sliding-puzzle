@@ -10,7 +10,7 @@ import { solveWithAnimation } from "./puzzle-solver.js";
 
 let SCRAMBLE_MOVES = 3;
 
-document.addEventListener("DOMContentLoaded", () => {
+(() => {
   const mount = document.getElementById("__debug_mount");
   if (!mount) return;
 
@@ -60,4 +60,4 @@ document.addEventListener("DOMContentLoaded", () => {
   solveBtn.addEventListener("click", () =>
     solveWithAnimation(msg => debugStatus.textContent = msg)
   );
-});
+})();
