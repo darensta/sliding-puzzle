@@ -3,6 +3,9 @@
 */
 
 console.log("PUZZLE DEBUG MODULE LOADED");
+const mount = document.getElementById("message");
+mount.innerHTML = "<div style='background:red;color:white;padding:20px;font-size:20px'>DEBUG MOUNT WORKS</div>";
+
 
 
 import { scramblePuzzle } from "./puzzle-scramble.js";
