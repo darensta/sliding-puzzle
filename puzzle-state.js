@@ -1,56 +1,54 @@
-/* puzzle-state.js */
+/* puzzle-state.js
+   Canonical shared puzzle state (single source of truth)
+*/
 
 export const PUZZLE_SIZE = 4;
 
-export let board = [];
-export let blankPos = { row: 0, col: 0 };
-export let moveCount = 0;
+/* Single live state object (shared by all modules) */
+export const state = {
+  board: [],
+  blankPos: { row: 0, col: 0 },
+  moveCount: 0
+};
 
+/* ----------------------------
+   Board initialization
+----------------------------- */
 export function initBoardSolved() {
-  board = [];
-  moveCount = 0;
+  state.board.length = 0;
+  state.moveCount = 0;
 
   let value = 0;
   for (let r = 0; r < PUZZLE_SIZE; r++) {
-    board[r] = [];
+    state.board[r] = [];
     for (let c = 0; c < PUZZLE_SIZE; c++) {
       if (r === 0 && c === 0) {
-        board[r][c] = null;
-        blankPos = { row: 0, col: 0 };
+        state.board[r][c] = null;
+        state.blankPos = { row: 0, col: 0 };
       } else {
-        board[r][c] = value++;
+        state.board[r][c] = value++;
       }
     }
   }
 }
 
+/* ----------------------------
+   Queries
+----------------------------- */
 export function findTile(v) {
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     for (let c = 0; c < PUZZLE_SIZE; c++) {
-      if (board[r][c] === v) return { r, c };
+      if (state.board[r][c] === v) return { r, c };
     }
   }
   return null;
-}
-
-export function moveTileIntoBlank(r, c) {
-  board[blankPos.row][blankPos.col] = board[r][c];
-  board[r][c] = null;
-  blankPos = { row: r, col: c };
-}
-
-export function tryMoveTile(r, c) {
-  if (Math.abs(r - blankPos.row) + Math.abs(c - blankPos.col) !== 1) return false;
-  moveTileIntoBlank(r, c);
-  moveCount++;
-  return true;
 }
 
 export function isSolved() {
   let expected = 0;
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     for (let c = 0; c < PUZZLE_SIZE; c++) {
-      const v = board[r][c];
+      const v = state.board[r][c];
       if (v === null) continue;
       if (v !== expected++) return false;
     }
@@ -59,11 +57,29 @@ export function isSolved() {
 }
 
 export function getBlankNeighbors() {
-  const { row, col } = blankPos;
+  const { row, col } = state.blankPos;
   const n = [];
   if (row > 0) n.push({ r: row - 1, c: col });
   if (row < 3) n.push({ r: row + 1, c: col });
   if (col > 0) n.push({ r: row, c: col - 1 });
   if (col < 3) n.push({ r: row, c: col + 1 });
   return n;
+}
+
+/* ----------------------------
+   Moves
+----------------------------- */
+export function moveTileIntoBlank(r, c) {
+  state.board[state.blankPos.row][state.blankPos.col] = state.board[r][c];
+  state.board[r][c] = null;
+  state.blankPos = { row: r, col: c };
+}
+
+export function tryMoveTile(r, c) {
+  if (Math.abs(r - state.blankPos.row) + Math.abs(c - state.blankPos.col) !== 1) {
+    return false;
+  }
+  moveTileIntoBlank(r, c);
+  state.moveCount++;
+  return true;
 }
