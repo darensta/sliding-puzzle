@@ -1,31 +1,17 @@
 /* puzzle-solver.js
-   A* Solver (Debug-only)
-   - Solves from any reachable state
-   - Animates solution step-by-step
-   - Expansion cap with explicit warning
+   A* solver (debug-only) — operates on shared state
 */
 
-import {
-  board,
-  blankPos,
-  moveTileIntoBlank,
-  moveCount
-} from "./puzzle-state.js";
+import { state, moveTileIntoBlank } from "./puzzle-state.js";
+import { updateAllTileTransforms, showSolvedPanel } from "./puzzle-render.js";
 
-import {
-  updateAllTileTransforms,
-  showSolvedPanel
-} from "./puzzle-render.js";
-
-/* ============================================================
-   State helpers
-============================================================ */
+/* ---------- helpers ---------- */
 
 function boardToState() {
   const s = [];
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
-      s.push(board[r][c] === null ? 0 : board[r][c] + 1);
+      s.push(state.board[r][c] === null ? 0 : state.board[r][c] + 1);
     }
   }
   return s;
@@ -35,10 +21,10 @@ function goalState() {
   return Array.from({ length: 16 }, (_, i) => i);
 }
 
-function manhattan(state) {
+function manhattan(stateArr) {
   let d = 0;
   for (let i = 0; i < 16; i++) {
-    const t = state[i];
+    const t = stateArr[i];
     if (t === 0) continue;
     const gr = Math.floor(t / 4), gc = t % 4;
     const r = Math.floor(i / 4), c = i % 4;
@@ -47,9 +33,9 @@ function manhattan(state) {
   return d;
 }
 
-function neighborsOf(state) {
+function neighborsOf(stateArr) {
   const res = [];
-  const bi = state.indexOf(0);
+  const bi = stateArr.indexOf(0);
   const r = Math.floor(bi / 4), c = bi % 4;
 
   const moves = [
@@ -64,19 +50,16 @@ function neighborsOf(state) {
     if (nr < 0 || nr > 3 || nc < 0 || nc > 3) continue;
 
     const ni = nr * 4 + nc;
-    const next = state.slice();
+    const next = stateArr.slice();
     next[bi] = next[ni];
     next[ni] = 0;
 
     res.push({ move: m.dir, state: next });
   }
-
   return res;
 }
 
-/* ============================================================
-   Public solver entry point
-============================================================ */
+/* ---------- public entry ---------- */
 
 export function solveWithAnimation(setDebugStatus) {
   setDebugStatus?.("Solving (A*)...");
@@ -134,13 +117,10 @@ export function solveWithAnimation(setDebugStatus) {
     "[Puzzle Solver] A* terminated without a solution. " +
     `Expanded ${expansions} states. This does NOT imply unsolvable.`
   );
-
   setDebugStatus?.(`No solution found (expansions: ${expansions}).`);
 }
 
-/* ============================================================
-   Animation
-============================================================ */
+/* ---------- animation ---------- */
 
 function animateSolution(moves, setDebugStatus) {
   let i = 0;
@@ -154,7 +134,7 @@ function animateSolution(moves, setDebugStatus) {
     }
 
     applyMove(moves[i++]);
-    moveCount++;
+    state.moveCount++;
     updateAllTileTransforms();
     setTimeout(step, 180);
   }
@@ -163,7 +143,7 @@ function animateSolution(moves, setDebugStatus) {
 }
 
 function applyMove(dir) {
-  const r = blankPos.row, c = blankPos.col;
+  const r = state.blankPos.row, c = state.blankPos.col;
   let tr = r, tc = c;
 
   if (dir === "up") tr--;
