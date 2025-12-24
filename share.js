@@ -1,24 +1,17 @@
 /* share.js
    Social sharing utilities (debug-safe, production-ready)
 */
+function shareOnFacebook(moves) {
+  const text = encodeURIComponent(
+    `I just solved the Edmunds.com tile puzzle in ${moves} moves!`
+  );
 
-function shareOnFacebook({ url, quote }) {
-  if (!url) {
-    console.warn("[Share] Missing URL for Facebook share.");
-    return;
-  }
+  const url = encodeURIComponent(window.location.href.split("?")[0]);
 
   const shareUrl =
-    "https://www.facebook.com/sharer/sharer.php?" +
-    new URLSearchParams({
-      u: url,
-      quote: quote || ""
-    }).toString();
+    `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
 
-  // Open in a new window/tab
-  window.open(
-    shareUrl,
-    "_blank",
-    "noopener,noreferrer,width=600,height=500"
-  );
+  window.open(shareUrl, "_blank", "width=600,height=400");
 }
+
+window.shareOnFacebook = shareOnFacebook;
