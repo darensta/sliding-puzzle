@@ -15,18 +15,26 @@ document.addEventListener("DOMContentLoaded", () => {
   createTilesOnce();
   updateAllTileTransforms();
 
-  grid.addEventListener("click", e => {
-    const tile = e.target.closest(".tile");
-    if (!tile) return;
+  let lastSolved = true; // board starts solved
 
-    const value = parseInt(tile.dataset.value, 10);
-    const pos = findTile(value);
+grid.addEventListener("click", e => {
+  const tile = e.target.closest(".tile");
+  if (!tile) return;
 
-    if (pos && tryMoveTile(pos.r, pos.c)) {
-      updateAllTileTransforms();
-      if (isSolved()) showSolvedPanel();
+  const value = parseInt(tile.dataset.value, 10);
+  const pos = findTile(value);
+
+  if (pos && tryMoveTile(pos.r, pos.c)) {
+    updateAllTileTransforms();
+
+    const nowSolved = isSolved();
+    if (!lastSolved && nowSolved) {
+      showSolvedPanel();
     }
-  });
+    lastSolved = nowSolved;
+  }
+});
+
 
   if (shareBtn) {
     shareBtn.addEventListener("click", () => {
