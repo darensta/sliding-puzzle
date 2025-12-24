@@ -2,13 +2,6 @@
    Canonical production engine
 */
 
-// 🔒 Production failsafe banner
-if (window.__PUZZLE_DEBUG__) {
-  const w = document.getElementById("message");
-  if (w) w.style.display = "block";
-}
-
-
 import { state, initBoardSolved, tryMoveTile, findTile, isSolved } from "./puzzle-state.js";
 import { initRender, createTilesOnce, updateAllTileTransforms, showSolvedPanel } from "./puzzle-render.js";
 
@@ -37,10 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (shareBtn) {
     shareBtn.addEventListener("click", () => {
-      shareOnFacebook({
-        url: window.location.href,
-        quote: `I just solved the Edmunds.com tile puzzle in ${state.moveCount} moves`
-      });
+      shareOnFacebook(state.moveCount);
     });
   }
 
