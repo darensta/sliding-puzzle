@@ -1,18 +1,6 @@
 /* puzzle-debug.js
    Dev-only debug UI + tools
 */
-new MutationObserver(m => console.warn("DOM MUTATION", m))
-  .observe(document.documentElement, { childList:true, subtree:true });
-
-console.log("PUZZLE DEBUG VERSION 2025-A LOADED");
-window.addEventListener("load", () => {
-  document.body.insertAdjacentHTML("afterbegin",
-    "<div style='background:red;color:white;font-size:26px;font-weight:900;text-align:center;padding:16px'>DEBUG BANNER TEST</div>"
-  );
-});
-
-
-
 import { scramblePuzzle } from "./puzzle-scramble.js";
 import { solveWithAnimation } from "./puzzle-solver.js";
 
