@@ -28,9 +28,9 @@ export function createTilesOnce() {
     tile.style.width = TILE_PX + "px";
     tile.style.height = TILE_PX + "px";
 
-    const srcIndex = value + 1;
-    const srcRow = Math.floor(srcIndex / 4);
-    const srcCol = srcIndex % 4;
+    const srcRow = Math.floor(value / 4);
+    const srcCol = value % 4;
+
 
     tile.style.backgroundImage = `url(${IMAGE_PATH})`;
     tile.style.backgroundPosition =
