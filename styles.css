@@ -70,26 +70,21 @@ main { padding:40px 20px; text-align:center; }
    PUZZLE GRID — CORRECTED & STABLE
 ============================================================ */
 #grid {
-  width: 400px;
-  height: 400px;
-  margin: 30px auto;
   position: relative;
-  background: #222;
-  border: 2px solid #000;
-  overflow: hidden;                 /* 🔧 FIX #1 */
+  display: block;      /* force non-grid flow */
+  line-height: 0;      /* kill baseline flow */
+  font-size: 0;        /* kill whitespace nodes */
 }
+
 
 .tile {
   position: absolute;
-  width: 100px;
-  height: 100px;
-  border: 2px solid #000;
-  background-size: 400px 400px;
-  background-repeat: no-repeat;
-  transition: transform 0.22s ease;
-  box-sizing: border-box;
-  will-change: transform;           /* 🔧 FIX #2 */
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
 }
+
 
 .tile.empty { background:#000 !important; }
 
