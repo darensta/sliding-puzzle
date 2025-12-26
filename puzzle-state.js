@@ -45,16 +45,18 @@ export function findTile(v) {
 }
 
 export function isSolved() {
+  if (state.blankPos.row !== 0 || state.blankPos.col !== 0) return false;
+
   let expected = 0;
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     for (let c = 0; c < PUZZLE_SIZE; c++) {
-      const v = state.board[r][c];
-      if (v === null) continue;
-      if (v !== expected++) return false;
+      if (r === 0 && c === 0) continue;
+      if (state.board[r][c] !== expected++) return false;
     }
   }
   return true;
 }
+
 
 export function getBlankNeighbors() {
   const { row, col } = state.blankPos;
