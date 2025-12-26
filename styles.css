@@ -16,12 +16,11 @@ body {
   color: white;
   padding: 12px 25px;
   display: flex;
-  justify-content: center;          /* Center the logo + nav */
+  justify-content: center;
   align-items: center;
-  position: relative;               /* Needed for right-side icons */
+  position: relative;
 }
 
-/* Icons stay pinned to the right edge */
 .ed-right {
   position: absolute;
   right: 25px;
@@ -39,79 +38,47 @@ body {
   gap: 20px;
 }
 
-.ed-logo {
-  height: 28px;
-}
-.ed-wordmark {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-}
+.ed-logo { height: 28px; }
+.ed-wordmark { font-size: 22px; font-weight: 600; letter-spacing: 0.4px; }
 
-.ed-nav {
-  display: flex;
-  gap: 25px;
-}
+.ed-nav { display: flex; gap: 25px; }
+.ed-nav a { color:white; text-decoration:none; font-size:15px; font-weight:500; }
+.ed-nav a:hover { text-decoration: underline; }
 
-.ed-nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.ed-nav a:hover {
-  text-decoration: underline;
-}
-
-.ed-icon {
-  cursor: pointer;
-}
+.ed-icon { cursor:pointer; }
 
 /* ============================================================
    MAIN CONTENT AREA
 ============================================================ */
-main {
-  padding: 40px 20px;
-  text-align: center;
-}
+main { padding:40px 20px; text-align:center; }
 
-/* Difficulty dropdown */
-#difficulty {
-  padding: 8px 14px;
-  font-size: 16px;
-  margin-bottom: 12px;
-}
+#difficulty { padding:8px 14px; font-size:16px; margin-bottom:12px; }
 
-/* Scramble button */
 #scrambleBtn {
-  padding: 12px 20px;
-  background: #0077e6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  margin-bottom: 20px;
+  padding:12px 20px;
+  background:#0077e6;
+  color:white;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+  cursor:pointer;
+  margin-bottom:20px;
 }
-
-#scrambleBtn:hover {
-  background: #005bb5;
-}
+#scrambleBtn:hover { background:#005bb5; }
 
 /* ============================================================
-   PUZZLE GRID — SMOOTH ANIMATED SLIDING
+   PUZZLE GRID — CORRECTED & STABLE
 ============================================================ */
 #grid {
   width: 400px;
   height: 400px;
   margin: 30px auto;
-  position: relative;                /* Required for absolute-position tiles */
+  position: relative;
   background: #222;
   border: 2px solid #000;
+  overflow: hidden;                 /* 🔧 FIX #1 */
 }
 
-/* Tiles are absolutely positioned and slide smoothly */
 .tile {
   position: absolute;
   width: 100px;
@@ -119,146 +86,102 @@ main {
   border: 2px solid #000;
   background-size: 400px 400px;
   background-repeat: no-repeat;
-  transition: transform 0.22s ease;  /* Smooth motion */
+  transition: transform 0.22s ease;
   box-sizing: border-box;
+  will-change: transform;           /* 🔧 FIX #2 */
 }
 
-.tile.empty {
-  background: #000 !important;
-}
+.tile.empty { background:#000 !important; }
 
 /* ============================================================
    FOOTER (EDMUNDS-LIKE)
 ============================================================ */
 .ed-footer {
-  background: #002E5D;
-  color: white;
-  padding: 50px 25px;
-  margin-top: 60px;
+  background:#002E5D;
+  color:white;
+  padding:50px 25px;
+  margin-top:60px;
 }
 
 .ed-footer-top {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 50px;
-  justify-content: space-between;
-  margin-bottom: 40px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:50px;
+  justify-content:space-between;
+  margin-bottom:40px;
 }
 
 .ed-footer-col {
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  min-width:200px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.ed-footer-col h3 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: bold;
-}
+.ed-footer-col h3 { margin:0; font-size:17px; font-weight:bold; }
+.ed-footer-col a { color:#c7dbff; text-decoration:none; font-size:15px; }
+.ed-footer-col a:hover { text-decoration:underline; }
 
-.ed-footer-col a {
-  color: #c7dbff;
-  text-decoration: none;
-  font-size: 15px;
-}
+.ed-social-icons { font-size:22px; display:flex; gap:10px; }
 
-.ed-footer-col a:hover {
-  text-decoration: underline;
-}
-
-.ed-social-icons {
-  font-size: 22px;
-  display: flex;
-  gap: 10px;
-}
-
-.ed-app-buttons {
-  margin-top: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.ed-app-buttons { margin-top:15px; display:flex; flex-direction:column; gap:12px; }
 
 .ed-app-btn {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background: #014a8f;
-  padding: 10px 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: white;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  background:#014a8f;
+  padding:10px 12px;
+  border-radius:8px;
+  text-decoration:none;
+  color:white;
 }
 
-.ed-divider {
-  border-top: 1px solid rgba(255,255,255,0.25);
-  margin: 30px 0;
-}
+.ed-divider { border-top:1px solid rgba(255,255,255,0.25); margin:30px 0; }
 
-.ed-legal {
-  font-size: 13px;
-  opacity: 0.8;
-  line-height: 1.5;
-}
+.ed-legal { font-size:13px; opacity:0.8; line-height:1.5; }
 
 /* ===============================
    SOLVED PANEL
 =============================== */
 #solved-panel {
-  margin-top: 24px;
-  padding: 20px;
-  border: 2px solid #0077e6;
-  border-radius: 10px;
-  background: #ffffff;
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top:24px;
+  padding:20px;
+  border:2px solid #0077e6;
+  border-radius:10px;
+  background:#fff;
+  max-width:420px;
+  margin-left:auto;
+  margin-right:auto;
 }
 
-#solved-panel h2 {
-  margin: 0 0 8px;
-  color: #0077e6;
-}
-
-#solved-panel p {
-  margin: 0 0 16px;
-  font-size: 16px;
-}
+#solved-panel h2 { margin:0 0 8px; color:#0077e6; }
+#solved-panel p { margin:0 0 16px; font-size:16px; }
 
 #shareFbSolvedBtn {
-  padding: 12px 20px;
-  background: #1877f2; /* Facebook blue */
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
+  padding:12px 20px;
+  background:#1877f2;
+  color:white;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+  cursor:pointer;
 }
-
-#shareFbSolvedBtn:hover {
-  background: #0f5fc4;
-}
-
+#shareFbSolvedBtn:hover { background:#0f5fc4; }
 
 /* ============================================================
    Debug controls
 ============================================================ */
-
-#debug-controls {
-  margin-bottom: 18px;
-}
+#debug-controls { margin-bottom:18px; }
 
 #solveBtn {
-  padding: 12px 20px;
-  background: #333;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  margin-left: 8px;
+  padding:12px 20px;
+  background:#333;
+  color:white;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+  cursor:pointer;
+  margin-left:8px;
 }
-#solveBtn:hover { background: #111; }
-
+#solveBtn:hover { background:#111; }
