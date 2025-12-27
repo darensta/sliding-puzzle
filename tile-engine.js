@@ -1,15 +1,18 @@
 /* tile-engine.js
    Sliding Puzzle Engine
    - Smooth sliding
+   - Daily deterministic scramble (UTC) with ?moves= override
    - Debug-only scramble + solver
-   - A* solver for proof-of-solvability
-   - Inline solved panel + sharing hook
+   - Solved panel + sharing hook
 */
 
 const PUZZLE_SIZE = 4;
 const GRID_PX = 400;
 const TILE_PX = GRID_PX / PUZZLE_SIZE;
 const IMAGE_PATH = "images/20251204.jpg";
+
+// Default daily scramble moves
+const DEFAULT_DAILY_MOVES = 25;
 
 let board = [];
 let blankPos = { row: 0, col: 0 };
@@ -19,15 +22,15 @@ let isScrambling = false;
 let isSolving = false;
 let SCRAMBLE_MOVES = 3;
 
+// Count moves for the current run (player + debug solve + debug scramble),
+// but we reset to 0 after the *initial* daily scramble.
+let moveCount = 0;
+
 // Debug mode enabled only with ?debug=1
 const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
 
 let gridEl, solvedPanelEl, shareFbSolvedBtn;
 let difficultyEl, scrambleBtn, solveBtn, debugControlsEl, debugStatusEl;
-
-function moveCount() {
-  return SCRAMBLE_MOVES ? board.flat().filter(v => v !== null).length : 0;
-}
 
 document.addEventListener("DOMContentLoaded", () => {
   gridEl = document.getElementById("grid");
@@ -42,15 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initBoardSolved();
   createTilesOnce();
+
+  // ✅ Daily deterministic scramble on load (UTC), always solvable
+  scrambleDailyOnLoad();
+
   updateAllTileTransforms();
+  updateSolvedUI();
 
- shareFbSolvedBtn.addEventListener("click", () => {
-  if (typeof shareOnFacebook === "function") {
-    shareOnFacebook(moveCount());
+  // Share hook (share.js owns the message; engine passes moves)
+  if (shareFbSolvedBtn) {
+    shareFbSolvedBtn.addEventListener("click", () => {
+      if (typeof shareOnFacebook === "function") {
+        shareOnFacebook(moveCount);
+      }
+    });
   }
-});
 
-
+  // Debug tools
   if (DEBUG_MODE && debugControlsEl) {
     debugControlsEl.style.display = "block";
 
@@ -81,8 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
 ----------------------------- */
 function initBoardSolved() {
   board = [];
-  let value = 0;
+  moveCount = 0;
 
+  let value = 0;
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     board[r] = [];
     for (let c = 0; c < PUZZLE_SIZE; c++) {
@@ -110,9 +122,9 @@ function createTilesOnce() {
     tile.style.width = TILE_PX + "px";
     tile.style.height = TILE_PX + "px";
 
+    // ✅ Correct slice mapping for tile value
     const srcRow = Math.floor(value / PUZZLE_SIZE);
     const srcCol = value % PUZZLE_SIZE;
-
 
     tile.style.backgroundImage = `url(${IMAGE_PATH})`;
     tile.style.backgroundPosition = `-${srcCol * TILE_PX}px -${srcRow * TILE_PX}px`;
@@ -120,7 +132,7 @@ function createTilesOnce() {
     tile.addEventListener("click", () => {
       if (isScrambling || isSolving) return;
       const pos = findTile(value);
-      if (pos) tryMoveTile(pos.r, pos.c);
+      if (pos) tryMoveTile(pos.r, pos.c, true);
     });
 
     gridEl.appendChild(tile);
@@ -145,19 +157,20 @@ function updateAllTileTransforms() {
     for (let c = 0; c < PUZZLE_SIZE; c++) {
       const v = board[r][c];
       if (v === null) continue;
-      tilesByValue[v].style.transform =
-        `translate(${c * TILE_PX}px, ${r * TILE_PX}px)`;
+      tilesByValue[v].style.transform = `translate(${c * TILE_PX}px, ${r * TILE_PX}px)`;
     }
   }
 }
 
-function tryMoveTile(r, c) {
-  if (Math.abs(r - blankPos.row) + Math.abs(c - blankPos.col) !== 1) return;
+function tryMoveTile(r, c, countMove) {
+  if (Math.abs(r - blankPos.row) + Math.abs(c - blankPos.col) !== 1) return false;
 
   moveTileIntoBlank(r, c);
-  updateAllTileTransforms();
+  if (countMove) moveCount++;
 
-  if (isSolved()) showSolvedPanel();
+  updateAllTileTransforms();
+  updateSolvedUI();
+  return true;
 }
 
 function moveTileIntoBlank(r, c) {
@@ -183,8 +196,9 @@ function isSolved() {
   return true;
 }
 
-function showSolvedPanel() {
-  if (solvedPanelEl) solvedPanelEl.style.display = "block";
+function updateSolvedUI() {
+  if (!solvedPanelEl) return;
+  solvedPanelEl.style.display = isSolved() ? "block" : "none";
 }
 
 /* ----------------------------
@@ -204,12 +218,95 @@ function getBlankNeighbors() {
   return n;
 }
 
+/* ============================================================
+   ✅ Daily deterministic scramble (UTC), always legal/solvable
+============================================================ */
+
+// YYYYMMDD based on UTC
+function utcDayKey() {
+  const d = new Date();
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}${m}${day}`;
+}
+
+// URL override: ?moves=25
+function getDailyMoveCount() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("moves");
+  if (!raw) return DEFAULT_DAILY_MOVES;
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < 0) return DEFAULT_DAILY_MOVES;
+  return Math.min(n, 5000); // safety cap
+}
+
+// xmur3 + mulberry32: deterministic PRNG from string seed
+function xmur3(str) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function() {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    h ^= h >>> 16;
+    return h >>> 0;
+  };
+}
+
+function mulberry32(a) {
+  return function() {
+    let t = (a += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function scrambleDailyOnLoad() {
+  const seedStr = utcDayKey();
+  const moves = getDailyMoveCount();
+
+  // seeded RNG
+  const seedFn = xmur3(seedStr);
+  const rand = mulberry32(seedFn());
+
+  // apply legal moves from solved => always solvable
+  let lastTile = null;
+
+  for (let i = 0; i < moves; i++) {
+    const neighbors = getBlankNeighbors().filter(p => board[p.r][p.c] !== lastTile);
+
+    // in rare cases (shouldn't happen), fallback to all neighbors
+    const opts = neighbors.length ? neighbors : getBlankNeighbors();
+
+    const choice = opts[Math.floor(rand() * opts.length)];
+    lastTile = board[choice.r][choice.c];
+
+    // do not count these moves as part of the run
+    tryMoveTile(choice.r, choice.c, false);
+  }
+
+  // Ensure the run starts at 0 moves for the player
+  moveCount = 0;
+
+  if (DEBUG_MODE) {
+    setDebugStatus(`Daily scramble seed=${seedStr}, moves=${moves}`);
+  }
+}
+
 /* ----------------------------
-   Scramble (debug only)
+   Scramble (debug only, animated)
 ----------------------------- */
 function scramblePuzzle(count) {
   if (isScrambling || isSolving) return;
   isScrambling = true;
+
+  // Start a fresh run when scrambling in debug
+  moveCount = 0;
+  updateSolvedUI();
 
   let lastTile = null;
 
@@ -220,14 +317,14 @@ function scramblePuzzle(count) {
       return;
     }
 
-    const neighbors = getBlankNeighbors()
-      .filter(p => board[p.r][p.c] !== lastTile);
+    const neighbors = getBlankNeighbors().filter(p => board[p.r][p.c] !== lastTile);
+    const opts = neighbors.length ? neighbors : getBlankNeighbors();
 
-    const choice = neighbors[Math.floor(Math.random() * neighbors.length)];
+    const choice = opts[Math.floor(Math.random() * opts.length)];
     lastTile = board[choice.r][choice.c];
 
-    moveTileIntoBlank(choice.r, choice.c);
-    updateAllTileTransforms();
+    // debug scramble counts normally (per your earlier rule)
+    tryMoveTile(choice.r, choice.c, true);
 
     setTimeout(() => step(movesLeft - 1), 220);
   }
@@ -270,10 +367,10 @@ function neighborsOf(state) {
   const r = Math.floor(bi / 4), c = bi % 4;
 
   const moves = [
-    { dir: "up",    dr: -1, dc:  0 },
-    { dir: "down",  dr:  1, dc:  0 },
-    { dir: "left",  dr:  0, dc: -1 },
-    { dir: "right", dr:  0, dc:  1 }
+    { dir: "up", dr: -1, dc: 0 },
+    { dir: "down", dr: 1, dc: 0 },
+    { dir: "left", dr: 0, dc: -1 },
+    { dir: "right", dr: 0, dc: 1 }
   ];
 
   for (const m of moves) {
@@ -354,7 +451,7 @@ function animateSolution(moves) {
   function step() {
     if (i >= moves.length) {
       updateAllTileTransforms();
-      showSolvedPanel();
+      updateSolvedUI();
       setDebugStatus(`Solved in ${moves.length} moves.`);
       isSolving = false;
       return;
@@ -362,6 +459,7 @@ function animateSolution(moves) {
 
     applyMove(moves[i++]);
     updateAllTileTransforms();
+    updateSolvedUI();
     setTimeout(step, 180);
   }
 
@@ -376,6 +474,8 @@ function applyMove(dir) {
   if (dir === "left") tc--;
   if (dir === "right") tc++;
   if (tr < 0 || tr > 3 || tc < 0 || tc > 3) return false;
-  moveTileIntoBlank(tr, tc);
+
+  // solver moves count normally (per your rule)
+  tryMoveTile(tr, tc, true);
   return true;
 }
