@@ -201,8 +201,18 @@ function isSolved() {
 
 function updateSolvedUI() {
   if (!solvedPanelEl) return;
-  solvedPanelEl.style.display = isSolved() ? "block" : "none";
+
+  const solved = isSolved();
+  solvedPanelEl.style.display = solved ? "block" : "none";
+
+  if (solved) {
+    const p = solvedPanelEl.querySelector("p");
+    if (p) {
+      p.textContent = `You completed the puzzle in ${moveCount} moves.`;
+    }
+  }
 }
+
 
 /* ----------------------------
    Debug helpers
