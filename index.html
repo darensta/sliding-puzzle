@@ -72,8 +72,17 @@
 fetch("/.netlify/functions/version")
   .then(r => r.json())
   .then(v => {
-    document.getElementById("build-stamp").textContent =
-      `Build ${v.commit.slice(0,7)} • ${new Date(v.time).toLocaleString()} • ${v.context}`;
+    const el = document.getElementById("build-stamp");
+    if (!el) return;
+
+    const commit = v.commit ? v.commit.slice(0,7) : "local";
+    const time = v.time ? new Date(v.time).toLocaleString() : "unknown";
+    const ctx = v.context || "dev";
+
+    el.textContent = `Build ${commit} • ${time} • ${ctx}`;
+  })
+  .catch(e => {
+    console.warn("Build stamp failed:", e);
   });
 </script>
 
