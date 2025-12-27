@@ -92,21 +92,21 @@ document.addEventListener("DOMContentLoaded", () => {
 ----------------------------- */
 function initBoardSolved() {
   board = [];
-  moveCount = 0;
-
   let value = 0;
+
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     board[r] = [];
     for (let c = 0; c < PUZZLE_SIZE; c++) {
-      if (r === 0 && c === 0) {
+      if (r === PUZZLE_SIZE - 1 && c === PUZZLE_SIZE - 1) {
         board[r][c] = null;
-        blankPos = { row: 0, col: 0 };
+        blankPos = { row: r, col: c };
       } else {
         board[r][c] = value++;
       }
     }
   }
 }
+
 
 /* ----------------------------
    Tile creation (once)
