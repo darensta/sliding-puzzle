@@ -124,9 +124,9 @@ function createTilesOnce() {
 
     // ✅ Correct slice mapping for tile value
     // where this tile belongs in the solved grid
-   const solvedIndex = value + 1;              // because (0,0) is blank
-   const srcRow = Math.floor(solvedIndex / PUZZLE_SIZE);
-   const srcCol = solvedIndex % PUZZLE_SIZE;
+   const srcRow = Math.floor(value / PUZZLE_SIZE);
+   const srcCol = value % PUZZLE_SIZE;
+
 
 
     tile.style.backgroundImage = `url(${IMAGE_PATH})`;
@@ -189,15 +189,15 @@ function isSolved() {
   let expected = 0;
   for (let r = 0; r < PUZZLE_SIZE; r++) {
     for (let c = 0; c < PUZZLE_SIZE; c++) {
-      if (r === 0 && c === 0) {
-        if (board[r][c] !== null) return false;
-      } else {
-        if (board[r][c] !== expected++) return false;
+      if (r === PUZZLE_SIZE - 1 && c === PUZZLE_SIZE - 1) {
+        return board[r][c] === null;
       }
+      if (board[r][c] !== expected++) return false;
     }
   }
   return true;
 }
+
 
 function updateSolvedUI() {
   if (!solvedPanelEl) return;
