@@ -25,6 +25,10 @@ const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === 
 let gridEl, solvedPanelEl, shareFbSolvedBtn;
 let difficultyEl, scrambleBtn, solveBtn, debugControlsEl, debugStatusEl;
 
+function moveCount() {
+  return SCRAMBLE_MOVES ? board.flat().filter(v => v !== null).length : 0;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   gridEl = document.getElementById("grid");
   solvedPanelEl = document.getElementById("solved-panel");
@@ -40,16 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
   createTilesOnce();
   updateAllTileTransforms();
 
-  if (shareFbSolvedBtn) {
-    shareFbSolvedBtn.addEventListener("click", () => {
-      if (typeof shareOnFacebook === "function") {
-        shareOnFacebook({
-          url: window.location.href,
-          quote: "I just solved the sliding puzzle!"
-        });
-      }
-    });
+ shareFbSolvedBtn.addEventListener("click", () => {
+  if (typeof shareOnFacebook === "function") {
+    shareOnFacebook(moveCount());
   }
+});
+
 
   if (DEBUG_MODE && debugControlsEl) {
     debugControlsEl.style.display = "block";
@@ -110,9 +110,9 @@ function createTilesOnce() {
     tile.style.width = TILE_PX + "px";
     tile.style.height = TILE_PX + "px";
 
-    const srcIndex = value + 1;
-    const srcRow = Math.floor(srcIndex / PUZZLE_SIZE);
-    const srcCol = srcIndex % PUZZLE_SIZE;
+    const srcRow = Math.floor(value / PUZZLE_SIZE);
+    const srcCol = value % PUZZLE_SIZE;
+
 
     tile.style.backgroundImage = `url(${IMAGE_PATH})`;
     tile.style.backgroundPosition = `-${srcCol * TILE_PX}px -${srcRow * TILE_PX}px`;
