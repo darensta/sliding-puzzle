@@ -61,5 +61,21 @@
   <script src="tile-engine.js"></script>
   <script src="share.js"></script>
 
+  <div id="build-stamp" style="
+  font-size:11px;
+  color:#777;
+  text-align:center;
+  margin-top:30px;
+"></div>
+  
+<script>
+fetch("/.netlify/functions/version")
+  .then(r => r.json())
+  .then(v => {
+    document.getElementById("build-stamp").textContent =
+      `Build ${v.commit.slice(0,7)} • ${new Date(v.time).toLocaleString()} • ${v.context}`;
+  });
+</script>
+
 </body>
 </html>
