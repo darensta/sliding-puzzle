@@ -1,7 +1,3 @@
-// where this tile belongs in the solved grid
-const solvedIndex = value + 1;              // because (0,0) is blank
-const srcRow = Math.floor(solvedIndex / PUZZLE_SIZE);
-const srcCol = solvedIndex % PUZZLE_SIZE;
 /* tile-engine.js
    Sliding Puzzle Engine
    - Smooth sliding
