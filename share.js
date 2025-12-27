@@ -11,3 +11,6 @@ export function shareOnFacebook(moveCount) {
     `&quote=${encodeURIComponent(quote)}`;
   window.open(shareUrl, "_blank");
 }
+
+// expose globally for engine
+window.shareOnFacebook = shareOnFacebook;
