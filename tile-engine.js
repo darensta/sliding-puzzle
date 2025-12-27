@@ -1,3 +1,7 @@
+// where this tile belongs in the solved grid
+const solvedIndex = value + 1;              // because (0,0) is blank
+const srcRow = Math.floor(solvedIndex / PUZZLE_SIZE);
+const srcCol = solvedIndex % PUZZLE_SIZE;
 /* tile-engine.js
    Sliding Puzzle Engine
    - Smooth sliding
@@ -123,8 +127,11 @@ function createTilesOnce() {
     tile.style.height = TILE_PX + "px";
 
     // ✅ Correct slice mapping for tile value
-    const srcRow = Math.floor(value / PUZZLE_SIZE);
-    const srcCol = value % PUZZLE_SIZE;
+    // where this tile belongs in the solved grid
+   const solvedIndex = value + 1;              // because (0,0) is blank
+   const srcRow = Math.floor(solvedIndex / PUZZLE_SIZE);
+   const srcCol = solvedIndex % PUZZLE_SIZE;
+
 
     tile.style.backgroundImage = `url(${IMAGE_PATH})`;
     tile.style.backgroundPosition = `-${srcCol * TILE_PX}px -${srcRow * TILE_PX}px`;
